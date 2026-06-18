@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Tools — Sky Thomas Gidge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121110; --panel:#1a1816; --panel-2:#211e1b; --ink:#ece7dc; --soft:#9a9286;
+    --faint:#605850; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
+    --accent:#d4663a;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --serif:"Newsreader",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+  .lab{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+
+  .top{position:fixed;top:0;left:0;right:0;z-index:60;height:62px;display:flex;align-items:center;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .back{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--soft);transition:color .2s,gap .2s}
+  .back:hover{color:var(--ink);gap:12px}
+  .back .ar{color:var(--accent)}
+  .top nav{display:flex;gap:24px}
+  .top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .2s}
+  .top nav a:hover{color:var(--ink)}
+
+  .page-header{padding:120px 0 54px;border-bottom:1px solid var(--line-2)}
+  .page-header .idx{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.1em}
+  .page-header h1{font-family:var(--serif);font-size:clamp(38px,5vw,62px);font-weight:400;letter-spacing:-.02em;margin-top:14px}
+  .ai-intro{display:grid;grid-template-columns:1fr 1fr;gap:38px;align-items:end;margin-top:34px}
+  .ai-intro .big{font-family:var(--serif);font-size:clamp(22px,2.6vw,30px);line-height:1.3;letter-spacing:-.01em;max-width:26ch}
+  .ai-intro .big b{color:var(--accent);font-weight:500;font-style:italic}
+  .ai-intro .side{font-size:15px;line-height:1.62;color:var(--soft);max-width:48ch}
+
+  .stats{display:flex;gap:46px;margin:54px 0 8px}
+  .stats .s .n{font-family:var(--serif);font-size:40px;color:var(--ink);letter-spacing:-.02em;line-height:1}
+  .stats .s .n b{color:var(--accent);font-weight:400}
+  .stats .s .k{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-top:9px}
+
+  .mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:44px 0 20px}
+  .mcard{background:var(--panel);border:1px solid var(--line-2);padding:30px 28px;display:flex;flex-direction:column;gap:17px;
+    transition:border-color .3s,transform .3s}
+  .mcard:hover{border-color:var(--line);transform:translateY(-3px)}
+  .mcard.live-card{border-color:rgba(212,102,58,.35)}
+  .mcard .metric{font-family:var(--serif);font-size:clamp(30px,3.4vw,42px);font-weight:400;letter-spacing:-.02em;color:var(--accent);line-height:1}
+  .mcard .metric small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--faint);margin-bottom:10px}
+  .mcard .st{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  .mcard h3{font-family:var(--serif);font-size:23px;font-weight:400;letter-spacing:-.01em;line-height:1.13;margin-top:7px}
+  .mcard p{font-size:14px;line-height:1.58;color:var(--soft);flex-grow:1}
+  .mcard .foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:6px}
+  .mcard .tags{display:flex;gap:7px;flex-wrap:wrap}
+  .mcard .tags span{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--line-2);padding:5px 8px;white-space:nowrap}
+  .mcard .live{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:#fff;background:var(--accent);padding:11px 14px;white-space:nowrap;transition:transform .2s}
+  .mcard .live:hover{transform:translateX(3px)}
+  .mcard .live .dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.7s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .mcard.span2{grid-column:span 2}
+  .mcard .shot{width:100%;border-radius:8px;overflow:hidden;border:1px solid var(--line-2);background:var(--panel-2)}
+  .mcard .shot img{display:block;width:100%;height:auto}
+  .mcard .gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  .mcard .gallery img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:7px;border:1px solid var(--line-2);
+    cursor:pointer;transition:transform .25s,border-color .25s}
+  .mcard .gallery img:hover{transform:scale(1.03);border-color:var(--accent)}
+  .mcard .glabel{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-top:-4px}
+  .mcard a.go{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink);border:1px solid var(--line-2);padding:11px 14px;white-space:nowrap;transition:border-color .2s,color .2s}
+  .mcard a.go:hover{border-color:var(--accent);color:#fff}
+  .mcard a.go .ar{color:var(--accent)}
+
+  .ethos{margin:30px 0 0;padding:34px 0 0;border-top:1px solid var(--line-2);display:grid;grid-template-columns:160px 1fr;gap:34px}
+  .ethos h4{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .ethos p{font-family:var(--serif);font-size:22px;line-height:1.4;letter-spacing:-.01em;max-width:48ch}
+  .ethos p b{color:var(--accent);font-weight:500;font-style:italic}
+
+  footer{padding:74px 0 60px;border-top:1px solid var(--line-2);margin-top:60px}
+  .colophon{display:flex;justify-content:space-between}
+
+  .rv{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .rv.seen{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+  @media(max-width:900px){
+    .wrap{padding:0 22px}
+    .mgrid,.ai-intro{grid-template-columns:1fr}
+    .mcard.span2{grid-column:span 1}
+    .ethos{grid-template-columns:1fr;gap:14px}
+    .stats{gap:30px;flex-wrap:wrap}
+    .top nav{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="top"><div class="wrap">
+    <a href="index.html" class="back"><span class="ar">←</span><span>Back</span></a>
+    <nav>
+      <a href="writing.html">Writing</a>
+      <a href="#">AI</a>
+      <a href="index.html#photography">Photography</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </div></div>
+
+  <main>
+    <div class="wrap">
+      <div class="page-header">
+        <span class="idx">03</span>
+        <h1>AI tools</h1>
+        <div class="ai-intro">
+          <p class="big rv">Eight projects so far. Two run on their own — I check on them like houseplants. The rule is simple: <b>Claude's a collaborator, not the last word.</b></p>
+          <p class="side rv">Everything it suggests gets traced back to the source before it ships. Some of it holds up, some doesn't — knowing the difference is most of the job. None of these are demos; each one earns its place by removing real work.</p>
+        </div>
+        <div class="stats rv">
+          <div class="s"><div class="n">8</div><div class="k">Projects built</div></div>
+          <div class="s"><div class="n"><b>2</b></div><div class="k">Running autonomously</div></div>
+          <div class="s"><div class="n">8<b>→</b>1</div><div class="k">Hrs saved per edit log</div></div>
+          <div class="s"><div class="n">中文</div><div class="k" data-comment-anchor="e481f57f1d-div">One runs bilingual</div></div>
+        </div>
+      </div>
+
+      <div class="mgrid" id="mgrid"></div>
+
+      <div class="ethos rv">
+        <h4>The rule</h4>
+        <p>Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — <b>if the logic doesn't hold up in the material, the suggestion doesn't move forward.</b></p>
+      </div>
+    </div>
+
+    <footer>
+      <div class="wrap">
+        <div class="colophon lab"><span>Sky Thomas Gidge © 2026</span><span>AI tools</span></div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/lightbox.js"></script>
+  <script>
+  SkyStore.load().then(function(){
+    const S=window.SKY;
+    const mg=document.getElementById("mgrid");
+    S.ai.forEach(function(p){
+      const c=document.createElement("div");
+      c.className="mcard rv"+(p.live?" live-card":"")+(p.span2?" span2":"");
+      const btn = p.live
+        ? `<a class="live" href="${p.live}" target="_blank" rel="noopener"><span class="dot"></span>It's live ↗</a>`
+        : p.link
+        ? `<a class="go" href="${p.link}" target="_blank" rel="noopener">${p.linkText||"Read it"}</a>`
+        : "";
+      const shot = p.img?`<div class="shot"><img src="${p.img}" alt="${p.t}" loading="lazy"></div>`:"";
+      const gallery = p.gallery?`<div class="gallery">${p.gallery.map(g=>`<img src="${g}" alt="" loading="lazy" data-shot="${g}">`).join("")}</div>`:"";
+      c.innerHTML=`<div class="metric"><small>${p.cadence?"Cadence":"Result"}</small>${p.metric}</div>
+        <div><div class="st">${p.status}</div><h3>${p.t}</h3></div>
+        <p>${p.d}</p>
+        ${shot}${gallery}
+        <div class="foot">
+          <div class="tags">${p.tags.map(t=>`<span>${t}</span>`).join("")}</div>
+          ${btn}
+        </div>`;
+      mg.appendChild(c);
+    });
+    mg.querySelectorAll("[data-shot]").forEach(function(img){
+      img.addEventListener("click",function(){ if(window.SkyLightbox) SkyLightbox.open(img.getAttribute("data-shot")); });
+    });
+    const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("seen")}),{threshold:.12});
+    document.querySelectorAll(".rv").forEach(el=>io.observe(el));
+    const topBar=document.querySelector(".top");
+    const onScroll=()=>topBar.style.borderBottomColor=window.scrollY>40?"var(--line)":"var(--line-2)";
+    onScroll();window.addEventListener("scroll",onScroll,{passive:true});
+  });
+  </script>
+</body>
+</html>

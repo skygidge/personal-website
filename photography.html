@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photography — Sky Thomas Gidge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121110; --panel:#1a1816; --panel-2:#211e1b; --ink:#ece7dc; --soft:#9a9286;
+    --faint:#605850; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
+    --accent:#d4663a;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --serif:"Newsreader",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 40px}
+  .lab{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+
+  .top{position:fixed;top:0;left:0;right:0;z-index:60;height:62px;display:flex;align-items:center;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .back{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--soft);transition:color .2s,gap .2s}
+  .back:hover{color:var(--ink);gap:12px}
+  .back .ar{color:var(--accent)}
+  .top nav{display:flex;gap:24px}
+  .top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .2s}
+  .top nav a:hover{color:var(--ink)}
+
+  .page-header{padding:120px 0 46px;border-bottom:1px solid var(--line-2)}
+  .page-header h1{font-family:var(--serif);font-size:clamp(38px,5vw,62px);font-weight:400;letter-spacing:-.02em}
+  .page-header .sub{font-size:15.5px;line-height:1.6;color:var(--soft);margin-top:16px;max-width:56ch}
+  .page-header .meta{display:flex;gap:28px;margin-top:22px}
+
+  .pg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:40px 0 0;grid-auto-flow:dense}
+  .cell{position:relative;aspect-ratio:3/4;overflow:hidden;background:#0a0908;cursor:pointer}
+  .cell.land{grid-column:span 2;aspect-ratio:3/2}
+  .cell img{width:100%;height:100%;object-fit:cover;display:block;
+    filter:saturate(.94) brightness(.9);transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .4s}
+  .cell:hover img{transform:scale(1.06);filter:saturate(1.04) brightness(1)}
+  .cell .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0,transparent 30%,transparent 60%,rgba(0,0,0,.7));
+    opacity:0;transition:opacity .35s}
+  .cell:hover .ov{opacity:1}
+  .cell .n{position:absolute;left:11px;top:9px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+    color:rgba(255,255,255,.85);opacity:0;transition:opacity .35s}
+  .cell .cp{position:absolute;left:12px;bottom:11px;right:12px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;color:#fff;opacity:0;transform:translateY(5px);
+    transition:opacity .35s,transform .35s}
+  .cell:hover .n,.cell:hover .cp{opacity:1;transform:none}
+
+  footer{padding:74px 0 60px;border-top:1px solid var(--line-2);margin-top:54px}
+  .colophon{display:flex;justify-content:space-between}
+
+  @media(max-width:900px){
+    .wrap{padding:0 22px}
+    .pg{grid-template-columns:repeat(2,1fr)}
+    .cell.land{grid-column:span 2}
+    .top nav{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="top"><div class="wrap">
+    <a href="index.html" class="back"><span class="ar">←</span><span>Back</span></a>
+    <nav>
+      <a href="writing.html">Writing</a>
+      <a href="ai-tools.html">AI</a>
+      <a href="#">Photography</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </div></div>
+
+  <main>
+    <div class="wrap">
+      <div class="page-header">
+        <h1>Photography</h1>
+        <p class="sub">Night photography and street work, mostly from Shenzhen — with some Los Angeles. Click any frame to view it full-size.</p>
+        <div class="meta"><span class="lab" id="count"></span></div>
+      </div>
+      <div class="pg" id="pg"></div>
+    </div>
+    <footer>
+      <div class="wrap">
+        <div class="colophon lab"><span>Sky Thomas Gidge © 2026</span><span>All photography</span></div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/lightbox.js"></script>
+  <script>
+  SkyStore.load().then(function(){
+    const S=window.SKY;
+    document.getElementById("count").textContent=S.photos.length+" frames · night · Shenzhen / LA";
+    const pg=document.getElementById("pg");
+    S.photos.forEach((p,i)=>{
+      const c=document.createElement("div");
+      c.className="cell"+(p.o==="l"?" land":"");
+      c.innerHTML=`<img src="${p.src}" alt="${p.cap}" loading="lazy"><div class="ov"></div>
+        <span class="n">${String(i+1).padStart(2,"0")}</span>
+        <span class="cp">${p.cap}${p.loc?" · "+p.loc:""}</span>`;
+      c.onclick=()=>SkyLightbox.open(i);
+      pg.appendChild(c);
+    });
+  });
+  </script>
+</body>
+</html>

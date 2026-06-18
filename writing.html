@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writing — Sky Thomas Gidge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121110; --panel:#1a1816; --panel-2:#211e1b; --ink:#ece7dc; --soft:#9a9286;
+    --faint:#605850; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
+    --accent:#d4663a;
+    --mono:"JetBrains Mono",ui-monospace,monospace;
+    --serif:"Newsreader",Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+  ::selection{background:var(--accent);color:#fff}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+  .lab{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+
+  /* top bar */
+  .top{position:fixed;top:0;left:0;right:0;z-index:60;height:62px;display:flex;align-items:center;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-2)}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;width:100%}
+  .back{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .2s,gap .2s}
+  .back:hover{color:var(--ink);gap:12px}
+  .back .ar{color:var(--accent)}
+  .top nav{display:flex;gap:24px}
+  .top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--soft);transition:color .2s}
+  .top nav a:hover{color:var(--ink)}
+
+  /* page header */
+  .page-header{padding:120px 0 60px;border-bottom:1px solid var(--line-2)}
+  .page-header h1{font-family:var(--serif);font-size:clamp(36px,5vw,58px);font-weight:400;letter-spacing:-.015em}
+  .page-header .sub{font-size:16px;line-height:1.55;color:var(--soft);margin-top:14px;max-width:55ch}
+  .page-header .meta{display:flex;gap:28px;margin-top:22px}
+
+  /* award */
+  .award{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line-2);
+    padding:18px 22px;margin-top:40px}
+  .award .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+  .award .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .award .t{font-family:var(--serif);font-style:italic;color:var(--soft);font-size:17px;margin-top:2px}
+
+  /* group dividers */
+  .wgroup{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint);
+    padding:44px 0 12px;display:flex;align-items:center;gap:14px}
+  .wgroup::after{content:"";flex:1;height:1px;background:var(--line-2)}
+  .wgroup:first-child{padding-top:10px}
+
+  /* article card */
+  .wlist .w{
+    display:grid;grid-template-columns:1fr 200px;gap:16px 24px;
+    padding:28px 0;border-top:1px solid var(--line-2);align-items:start;transition:background .3s}
+  .wlist .w.has-thumb{grid-template-columns:130px 1fr 200px}
+  .wlist .w:hover{background:linear-gradient(90deg,rgba(26,24,22,.6),transparent)}
+
+  /* thumbnail */
+  .w-thumb{width:130px;aspect-ratio:1/1;border-radius:8px;overflow:hidden;
+    background:var(--panel-2);border:1px solid var(--line-2);flex-shrink:0;
+    transition:box-shadow .3s,transform .3s}
+  .w:hover .w-thumb{box-shadow:0 6px 24px rgba(0,0,0,.5);transform:translateY(-2px)}
+  .w-thumb canvas{display:block;width:100%;height:auto}
+  .w-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+
+  /* text */
+  .wk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:9px}
+  .wt{font-family:var(--serif);font-size:clamp(21px,2.3vw,27px);font-weight:400;line-height:1.12;
+    letter-spacing:-.01em;max-width:28ch;display:block}
+  .w:hover .wt{color:#fff}
+  a.wt:hover{color:var(--accent) !important}
+  .wd{font-size:14.5px;line-height:1.55;color:var(--soft);margin-top:9px;max-width:60ch}
+  .wn{font-size:13px;line-height:1.5;color:var(--faint);margin-top:10px;font-style:italic;font-family:var(--serif)}
+  .wdate{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--faint);margin-top:8px}
+  .feat .wt{font-size:clamp(24px,2.9vw,33px)}
+
+  /* side actions */
+  .wside{display:flex;flex-direction:column;align-items:flex-end;gap:13px;padding-top:5px}
+  .wp{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--faint);text-align:right}
+  .wacts{display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+  .wacts a{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--soft);border:1px solid var(--line-2);
+    padding:8px 12px;transition:color .2s,border-color .2s,background .2s;white-space:nowrap}
+  .wacts a:hover{color:#fff;border-color:var(--accent);background:rgba(212,102,58,.1)}
+  .wacts a .ar{color:var(--accent)}
+  .censored{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--faint);border:1px dashed var(--line);padding:5px 9px}
+
+  /* footer */
+  footer{padding:74px 0 60px;border-top:1px solid var(--line-2);margin-top:40px}
+  .colophon{display:flex;justify-content:space-between}
+
+  .rv{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+  .rv.seen{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
+
+  @media(max-width:900px){
+    .wrap{padding:0 22px}
+    .wlist .w,.wlist .w.has-thumb{grid-template-columns:1fr !important}
+    .w-thumb{width:100px;aspect-ratio:1/1}
+    .wside{align-items:flex-start}
+    .wp{text-align:left}
+    .wacts{flex-direction:row;align-items:center;flex-wrap:wrap}
+    .top nav{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="top"><div class="wrap">
+    <div class="mark">
+      <a href="index.html" class="back"><span class="ar">←</span><span>Back</span></a>
+    </div>
+    <nav>
+      <a href="#">Writing</a>
+      <a href="index.html#ai">AI</a>
+      <a href="index.html#photography">Photography</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+  </div></div>
+
+  <main>
+    <div class="wrap">
+      <div class="page-header">
+        <h1>Writing</h1>
+        <p class="sub">Journalism from Shenzhen — features, investigations, breaking news, street portraits, and the occasional column nobody asked for. Published in Shenzhen Daily and That's Magazines between 2015–2018. This is a selection — there's more than what's collected here.</p>
+        <div class="meta">
+          <span class="lab" id="articleCount"></span>
+        </div>
+        <div class="award" id="award"></div>
+      </div>
+      <div class="wlist" id="wlist"></div>
+    </div>
+    <footer>
+      <div class="wrap">
+        <div class="colophon lab"><span>Sky Thomas Gidge © 2026</span><span>All writing</span></div>
+      </div>
+    </footer>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/store.js"></script>
+  <script src="assets/pdf-thumbs.js"></script>
+  <script>
+  SkyStore.load().then(function init(){
+    const S=window.SKY;
+    document.getElementById("articleCount").textContent=S.writing.length+" articles";
+    document.getElementById("award").innerHTML=
+      `<span class="dot"></span><div><div class="k">${S.award.kicker} · ${S.award.pub}</div><div class="t">${S.award.t}</div></div>`;
+
+    const wl=document.getElementById("wlist");
+    let lastGroup=null;
+    S.writing.forEach(function(w){
+      const g=w.group||"More";
+      if(g!==lastGroup){
+        const h=document.createElement("div");h.className="wgroup";h.textContent=g;
+        wl.appendChild(h);lastGroup=g;
+      }
+      const hasPdf=!!w.pdf;
+      const hasThumb=hasPdf||!!w.img;
+      const row=document.createElement("div");
+      row.className="w rv"+(w.feat?" feat":"")+(hasThumb?" has-thumb":"");
+      const titleHref=w.site||w.pdf||"";
+      const acts=[
+        w.site?`<a href="${w.site}" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a>`:"",
+        w.pdf?`<a href="${w.pdf}" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a>`:"",
+        w.censored?`<span class="censored">Censored — print only</span>`:""
+      ].join("");
+      const thumbHtml=w.img?`<div class="w-thumb thumb-loaded"><img src="${w.img}" alt="" loading="lazy"></div>`
+        :hasPdf?`<div class="w-thumb" data-pdf-thumb="${w.pdf}"></div>`:"";
+      row.innerHTML=`${thumbHtml}
+        <div class="w-body">
+          <div class="wk">${w.kicker}</div>
+          ${titleHref?`<a class="wt" href="${titleHref}" target="_blank" rel="noopener">${w.t}</a>`:`<div class="wt">${w.t}</div>`}
+          <div class="wd">${w.d||""}</div>
+          ${w.note?`<div class="wn">${w.note}</div>`:""}
+          ${w.date?`<div class="wdate">${w.date}</div>`:""}
+        </div>
+        <div class="wside">
+          <div class="wp">${w.pub||""}</div>
+          <div class="wacts">${acts}</div>
+        </div>`;
+      wl.appendChild(row);
+    });
+
+    const io=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(e.isIntersecting)e.target.classList.add("seen");
+    })},{threshold:.14});
+    document.querySelectorAll(".rv").forEach(function(el){io.observe(el);});
+    PdfThumbs.init();
+  });
+  </script>
+</body>
+</html>
