@@ -65,7 +65,7 @@ window.SKY = (function () {
   const writing = [
     /* ---- Features & investigations ---- */
     { group: "Features & investigations",
-      t: "Under Fire: How Easy Is It to Obtain a Gun?", kicker: "Investigation", pub: "Print only", home: true, homeOrder: 1,
+      t: "Under Fire: How Easy Is It to Get a Gun in China?", kicker: "Investigation", pub: "Print only", home: true, homeOrder: 1,
       d: "The grey zones and black markets that supply China's gun buyers — reported from the seller side.",
       note: "Ran in print. Never made it online — the censors saw to that. The PDF is the whole story.",
       censored: true,
@@ -388,14 +388,14 @@ window.SKY = (function () {
   ];
 
   const ethos = "Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — if the logic doesn't hold up in the material, the suggestion doesn't move forward.";
-  const introLine = "I'm a photographer and video producer who also writes, and lately spends a worrying amount of time building small AI tools. Most of the photos here were taken at night in Shenzhen. The tools were built to save time, and usually do.";
+  const introLine = "I'm a video editor, producer, photographer and journalist who lately spends a worrying amount of time building AI tools. Most of the photos were taken at night in Shenzhen. The tools were built to save time, and usually do.";
 
   const identity = {
     name: "Sky Thomas Gidge",
     roles: ["Photographer", "Journalist", "AI practitioner"],
     places: "Shenzhen · Los Angeles",
     email: "sgidge@gmail.com",
-    bio: "Photographer, video producer, journalist, and AI practitioner working between Shenzhen and Los Angeles. Night photography and street work from South China. Brand video for Insta360 and DJI. Investigative reporting for That's Magazines. And a growing kit of Claude tools that actually reduce the work.",
+    bio: "Video editor, photographer, journalist, and AI practitioner working between Shenzhen and Los Angeles. Night photography and street work from South China. Brand video for Insta360 and DJI. Investigative reporting for That's Magazines. And a growing kit of Claude tools that actually reduce the work.",
     clients: ["Insta360", "DJI", "Indian Motorcycles", "Whiskey Bottle Co."]
   };
 

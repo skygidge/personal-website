@@ -34,6 +34,8 @@
   .top nav{display:flex;gap:24px}
   .top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .2s}
   .top nav a:hover{color:var(--ink)}
+  .navtoggle{display:none;background:none;border:0;color:var(--soft);font-size:21px;line-height:1;cursor:pointer;padding:6px 4px;transition:color .2s}
+  .navtoggle:hover{color:var(--ink)}
 
   .page-header{padding:120px 0 46px;border-bottom:1px solid var(--line-2)}
   .page-header h1{font-family:var(--serif);font-size:clamp(38px,5vw,62px);font-weight:400;letter-spacing:-.02em}
@@ -63,19 +65,25 @@
     .wrap{padding:0 22px}
     .pg{grid-template-columns:repeat(2,1fr)}
     .cell.land{grid-column:span 2}
-    .top nav{display:none}
+    .navtoggle{display:inline-flex;align-items:center}
+    .top nav{display:none;position:absolute;top:62px;left:0;right:0;flex-direction:column;gap:0;
+      background:color-mix(in srgb,var(--bg) 97%,transparent);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line-2);padding:6px 0}
+    .top.navopen nav{display:flex}
+    .top nav a{padding:14px 22px;font-size:13px}
   }
 </style>
 </head>
 <body>
   <div class="top"><div class="wrap">
     <a href="index.html" class="back"><span class="ar">←</span><span>Back</span></a>
-    <nav>
+    <nav onclick="this.closest('.top').classList.remove('navopen')">
       <a href="writing.html">Writing</a>
       <a href="ai-tools.html">AI</a>
       <a href="#">Photography</a>
       <a href="index.html#contact">Contact</a>
     </nav>
+    <button class="navtoggle" aria-label="Menu" onclick="this.closest('.top').classList.toggle('navopen')">☰</button>
   </div></div>
 
   <main>

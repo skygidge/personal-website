@@ -38,6 +38,8 @@
   .top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);
     transition:color .2s}
   .top nav a:hover{color:var(--ink)}
+  .navtoggle{display:none;background:none;border:0;color:var(--soft);font-size:21px;line-height:1;cursor:pointer;padding:6px 4px;transition:color .2s}
+  .navtoggle:hover{color:var(--ink)}
 
   /* hero — a photo sets the mood */
   .hero{position:relative;height:100svh;min-height:560px;overflow:hidden;background:#000}
@@ -193,12 +195,19 @@
     .aigrid,.ai-intro,.foot-top{grid-template-columns:1fr}
     .aic.span2{grid-column:span 1}
     .intro .grid{grid-template-columns:1fr;gap:16px}
-    .wlist .w,.wlist .w.has-thumb{grid-template-columns:1fr !important}
-    .w-thumb{width:100px;aspect-ratio:1/1}
+    .wlist .w{grid-template-columns:1fr !important}
+    .wlist .w.has-thumb{grid-template-columns:88px 1fr !important;column-gap:16px}
+    .wlist .w.has-thumb .wside{grid-column:1 / -1}
+    .w-thumb{width:88px;aspect-ratio:1/1}
     .wlist .wp{text-align:left}
     .wside{align-items:flex-start}
     .wacts{flex-direction:row;align-items:center;flex-wrap:wrap}
-    .top nav{display:none}
+    .navtoggle{display:inline-flex;align-items:center}
+    .top nav{display:none;position:absolute;top:62px;left:0;right:0;flex-direction:column;gap:0;
+      background:color-mix(in srgb,var(--bg) 97%,transparent);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line-2);padding:6px 0}
+    .top.navopen nav{display:flex}
+    .top nav a{padding:14px 22px;font-size:13px}
     .hero .scroll{display:none}
   }
 </style>
@@ -206,20 +215,21 @@
 <body>
   <div class="top" id="top"><div class="wrap">
     <div class="mark"><span class="nm">Sky Thomas Gidge</span><span class="rl">Shenzhen / LA</span></div>
-    <nav>
+    <nav onclick="this.closest('.top').classList.remove('navopen')">
       <a href="#writing">Writing</a>
       <a href="#ai">AI</a>
       <a href="#photography">Photography</a>
       <a href="#contact">Contact</a>
     </nav>
+    <button class="navtoggle" aria-label="Menu" onclick="this.closest('.top').classList.toggle('navopen')">☰</button>
   </div></div>
 
   <header class="hero">
-    <img src="uploads/hero-rooftop.jpg" alt="Shenzhen skyline at blue hour from a rooftop">
+    <img src="uploads/hero-rooftop-v2.jpg" alt="Shenzhen skyline at blue hour from a rooftop">
     <div class="photo-meta lab">Futian · blue hour</div>
     <div class="cap wrap">
       <div class="nm">Sky Thomas Gidge</div>
-      <p class="tag">Photographer and video producer. Sometimes a journalist. Lately, against my better judgement, a builder of small AI tools.</p>
+      <p class="tag">Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of small AI tools — and a newsletter about AI.</p>
     </div>
     <div class="scroll"><span>Scroll</span><span class="ln"></span></div>
   </header>

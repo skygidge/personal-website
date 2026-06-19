@@ -38,6 +38,8 @@
   .top nav a{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
     color:var(--soft);transition:color .2s}
   .top nav a:hover{color:var(--ink)}
+  .navtoggle{display:none;background:none;border:0;color:var(--soft);font-size:21px;line-height:1;cursor:pointer;padding:6px 4px;transition:color .2s}
+  .navtoggle:hover{color:var(--ink)}
 
   /* page header */
   .page-header{padding:120px 0 60px;border-bottom:1px solid var(--line-2)}
@@ -108,12 +110,19 @@
 
   @media(max-width:900px){
     .wrap{padding:0 22px}
-    .wlist .w,.wlist .w.has-thumb{grid-template-columns:1fr !important}
-    .w-thumb{width:100px;aspect-ratio:1/1}
+    .wlist .w{grid-template-columns:1fr !important}
+    .wlist .w.has-thumb{grid-template-columns:88px 1fr !important;column-gap:16px}
+    .wlist .w.has-thumb .wside{grid-column:1 / -1}
+    .w-thumb{width:88px;aspect-ratio:1/1}
     .wside{align-items:flex-start}
     .wp{text-align:left}
     .wacts{flex-direction:row;align-items:center;flex-wrap:wrap}
-    .top nav{display:none}
+    .navtoggle{display:inline-flex;align-items:center}
+    .top nav{display:none;position:absolute;top:62px;left:0;right:0;flex-direction:column;gap:0;
+      background:color-mix(in srgb,var(--bg) 97%,transparent);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line-2);padding:6px 0}
+    .top.navopen nav{display:flex}
+    .top nav a{padding:14px 22px;font-size:13px}
   }
 </style>
 </head>
@@ -122,12 +131,13 @@
     <div class="mark">
       <a href="index.html" class="back"><span class="ar">←</span><span>Back</span></a>
     </div>
-    <nav>
+    <nav onclick="this.closest('.top').classList.remove('navopen')">
       <a href="#">Writing</a>
       <a href="index.html#ai">AI</a>
       <a href="index.html#photography">Photography</a>
       <a href="index.html#contact">Contact</a>
     </nav>
+    <button class="navtoggle" aria-label="Menu" onclick="this.closest('.top').classList.toggle('navopen')">☰</button>
   </div></div>
 
   <main>
