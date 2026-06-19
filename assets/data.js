@@ -55,7 +55,9 @@ window.SKY = (function () {
     { src: U + "649225512_18085059593246520_186182321330016461_n.jpg", cap: "Hand", loc: "Detail", o: "p" },
     { src: U + "629786730_18393072844195956_698995262378286313_n.jpg", cap: "Bell", loc: "Portrait", o: "p" },
     { src: U + "623052680_18310111390253619_3350103299258808604_n.jpg", cap: "Through the lens", loc: "Portrait", o: "p" },
-    { src: U + "654661188_18130833331529128_5641409037700819593_n.jpg", cap: "Dune", loc: "California", o: "p" }
+    { src: U + "654661188_18130833331529128_5641409037700819593_n.jpg", cap: "Dune", loc: "California", o: "p" },
+    { src: U + "pingan-building-11.jpg", cap: "City watchers", loc: "Shenzhen", o: "p" },
+    { src: U + "pingan-building-12.jpg", cap: "On the edge", loc: "Rooftop", o: "p" }
   ];
 
   /* Writing — complete list with PDFs and article links. */
@@ -153,6 +155,11 @@ window.SKY = (function () {
       note: "Co-byline with Sarb Singh.",
       site: "http://szdaily.sznews.com:80/html/2015-09/28/content_3348677.htm",
       date: "2015-09-28" },
+    { group: "News reporting", source: "sd",
+      t: "The Man Behind the Makers", kicker: "Profile", pub: "Shenzhen Daily",
+      d: "A profile of Duncan Turner, managing director of HAX — one of the world's most active hardware accelerators, run out of Huaqiangbei in Shenzhen.",
+      site: "http://www.szdaily.com/content/2015-11/06/content_12445830.htm",
+      date: "2015-11-06" },
     { group: "News reporting", source: "sd",
       t: "Americans in Shenzhen React to Worldwide Travel Alert", kicker: "News", pub: "Shenzhen Daily",
       d: "American expats in Shenzhen respond to a global travel advisory.",
