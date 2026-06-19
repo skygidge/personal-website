@@ -184,7 +184,7 @@ window.SKY = (function () {
       t: "Hundreds Held in Police Raids, Tested for Drugs", kicker: "Breaking news", pub: "Shenzhen Daily", home: true, homeOrder: 2,
       d: "Breaking coverage of a massive police operation sweeping Shenzhen's entertainment district — the story behind the Excellence in Journalism Award.",
       img: P + "mmexport1456120953563.jpg.webp",
-      note: "Co-byline with Zhang Qian. Won third prize in its category. Quoted by international press, including The Guardian.",
+      note: "Won the Excellence in Journalism Award. Quoted by international press, including The Guardian.",
       site: "http://www.szdaily.com/content/2016-02/22/content_12832950.htm",
       awardLink: "http://www.szdaily.com/content/2017-04/21/content_16052756.htm",
       date: "2016-02-22" },
