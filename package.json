@@ -5,6 +5,8 @@
   "description": "Sky Thomas Gidge — static personal website (GitHub Pages).",
   "scripts": {
     "build": "node scripts/build.js",
+    "package": "node scripts/package.js",
+    "check-artifact": "node scripts/check-artifact.js",
     "optimize": "node scripts/optimize-images.js",
     "validate": "node scripts/validate.js",
     "test": "node scripts/validate.js"

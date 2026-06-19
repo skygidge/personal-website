@@ -1,0 +1,56 @@
+name: deploy
+
+# Build an allowlisted runtime artifact and deploy it to GitHub Pages.
+# The repo root is NOT served directly, so build-input/source files
+# (assets/data.js, scripts/, package.json, README.md) never reach the browser.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # No dependencies — build/validate/package are pure Node.
+      - name: Validate
+        run: npm test
+      - name: Build static HTML
+        run: npm run build
+      - name: Verify build output is committed (no drift)
+        run: |
+          git diff --exit-code -- '*.html' sitemap.xml \
+            || (echo "::error::Built HTML/sitemap is stale — run 'npm run build' and commit." && exit 1)
+      - name: Package runtime artifact (allowlist only)
+        run: npm run package
+      - name: Verify artifact excludes build-input/source files
+        run: npm run check-artifact
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

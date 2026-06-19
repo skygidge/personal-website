@@ -86,6 +86,12 @@ PAGES.forEach((page) => {
   REQUIRED.forEach(([re, label]) => { if (!re.test(html)) E(`${page}: missing ${label}`); });
 });
 
+// ---------- 4b. data.js is build-input only — pages must not load it ----------
+PAGES.concat(["404.html"]).forEach((page) => {
+  if (!exists(page)) return;
+  if (/assets\/data\.js/.test(read(page))) E(`${page}: references assets/data.js (build input must not be loaded at runtime)`);
+});
+
 // ---------- 5. internal links / anchors resolve ----------
 const idCache = {};
 const idsOf = (page) => (idCache[page] ||= new Set((read(page).match(/id="([^"]+)"/g) || []).map((s) => s.slice(4, -1))));
