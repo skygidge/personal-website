@@ -1,0 +1,13 @@
+{
+  "name": "personal-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sky Thomas Gidge — static personal website (GitHub Pages).",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "optimize": "node scripts/optimize-images.js",
+    "validate": "node scripts/validate.js",
+    "test": "node scripts/validate.js"
+  },
+  "license": "UNLICENSED"
+}
