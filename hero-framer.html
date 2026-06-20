@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero framer — local tool</title>
+<!-- Local dev tool. Not part of the deployed site (not in the Pages allowlist).
+     Drag the hero image to frame it, copy the object-position value, send it to Claude. -->
+<style>
+  :root{--ink:#ece7dc;--soft:#9a9286;--faint:#605850;--accent:#d4663a;--line:rgba(236,231,220,.14);
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,monospace;--serif:Georgia,"Times New Roman",serif;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{background:#000;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+  .stage{position:fixed;inset:0;overflow:hidden;background:#0a0908;cursor:grab;touch-action:none}
+  .stage.drag{cursor:grabbing}
+  .stage img{width:100%;height:100%;object-fit:cover;object-position:50% 16%;display:block;
+    user-select:none;-webkit-user-drag:none;pointer-events:none}
+  .overlay{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(18,17,16,.5) 0%,rgba(18,17,16,0) 26%,rgba(18,17,16,.18) 60%,rgba(18,17,16,.96) 100%)}
+  .wm{position:absolute;left:40px;top:20px;font-family:var(--serif);font-size:17px;letter-spacing:.01em;pointer-events:none}
+  .cap{position:absolute;left:40px;bottom:54px;right:40px;pointer-events:none}
+  .cap .nm{font-family:var(--serif);font-size:clamp(34px,5.6vw,68px);line-height:1.02;letter-spacing:-.015em;font-weight:400}
+  .cap .tag{margin-top:16px;max-width:50ch;font-size:clamp(15px,1.7vw,18px);line-height:1.55;color:#d7d1c5}
+
+  .panel{position:fixed;right:18px;bottom:18px;z-index:10;width:320px;max-width:calc(100vw - 36px);
+    background:rgba(20,18,16,.94);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;font-family:var(--mono);font-size:12px;color:var(--soft)}
+  .panel.min{padding:11px 14px;width:auto}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .head h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .min .body{display:none}
+  .head .mini{cursor:pointer;color:var(--soft);background:none;border:0;font-family:var(--mono);font-size:11px;letter-spacing:.1em}
+  .head .mini:hover{color:#fff}
+  .desc{line-height:1.5;margin:11px 0 12px}
+  .out{background:#000;border:1px solid var(--line);border-radius:8px;padding:12px 13px;color:var(--ink);font-size:13.5px;
+    cursor:text;letter-spacing:.02em}
+  .out b{color:var(--accent)}
+  .min .out{margin:0}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .btn{flex:1;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);
+    background:none;border:1px solid var(--line);border-radius:8px;padding:10px 8px;cursor:pointer;text-align:center;
+    transition:border-color .2s,color .2s;white-space:nowrap}
+  .btn:hover{border-color:var(--accent);color:#fff}
+  .toggles{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .toggles label{display:flex;align-items:center;gap:9px;cursor:pointer;color:var(--soft)}
+  .toggles input{accent-color:var(--accent)}
+  .hint{margin-top:12px;padding-top:11px;border-top:1px solid rgba(236,231,220,.08);font-size:11px;color:var(--faint);line-height:1.5}
+  input[type=file]{display:none}
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <img id="img" src="uploads/hero-rooftop-v2.jpg" alt="hero">
+    <div class="overlay ctx"></div>
+    <div class="wm ctx">Sky Thomas Gidge</div>
+    <div class="cap ctx">
+      <div class="nm">Sky Thomas Gidge</div>
+      <div class="tag">Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of small AI tools — and a newsletter about AI.</div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="head">
+      <h2>Hero framer</h2>
+      <button class="mini" id="mini">hide ▾</button>
+    </div>
+    <div class="body">
+      <p class="desc">Drag the image to frame it. Copy the value below and send it to me — I'll apply it to the live hero.</p>
+      <div class="out" id="out" title="Click to select">object-position: <b id="val">50% 16%</b></div>
+      <div class="row">
+        <button class="btn" id="copy">Copy</button>
+        <button class="btn" id="reset">Reset</button>
+        <label class="btn">Image…<input type="file" id="file" accept="image/*"></label>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="ov" checked> Show gradient &amp; text</label>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  var stage=document.getElementById('stage'), img=document.getElementById('img'),
+      val=document.getElementById('val'), hint=document.getElementById('hint'),
+      panel=document.getElementById('panel');
+  var DEF={x:50,y:16}, posX=DEF.x, posY=DEF.y;
+  var clamp=function(v){return Math.max(0,Math.min(100,v));};
+
+  function apply(){
+    img.style.objectPosition = Math.round(posX)+'% '+Math.round(posY)+'%';
+    val.textContent = Math.round(posX)+'% '+Math.round(posY)+'%';
+  }
+  function overflow(){
+    var W=stage.clientWidth,H=stage.clientHeight,w=img.naturalWidth||W,h=img.naturalHeight||H;
+    var s=Math.max(W/w,H/h);
+    return {ox:Math.max(0,w*s-W), oy:Math.max(0,h*s-H)};
+  }
+  // drag to pan
+  var dragging=false,lx=0,ly=0;
+  function pt(e){var t=e.touches&&e.touches[0]?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+  function down(e){dragging=true;stage.classList.add('drag');var p=pt(e);lx=p.x;ly=p.y;e.preventDefault();}
+  function move(e){
+    if(!dragging)return;
+    var p=pt(e),o=overflow();
+    if(o.ox>0) posX=clamp(posX-(p.x-lx)/o.ox*100);
+    if(o.oy>0) posY=clamp(posY-(p.y-ly)/o.oy*100);
+    lx=p.x;ly=p.y;apply();
+  }
+  function up(){dragging=false;stage.classList.remove('drag');}
+  stage.addEventListener('mousedown',down);
+  window.addEventListener('mousemove',move);
+  window.addEventListener('mouseup',up);
+  stage.addEventListener('touchstart',down,{passive:false});
+  window.addEventListener('touchmove',move,{passive:false});
+  window.addEventListener('touchend',up);
+  // arrow-key nudge for precision
+  window.addEventListener('keydown',function(e){
+    var step=e.shiftKey?5:1;
+    if(e.key==='ArrowUp')posY=clamp(posY-step);
+    else if(e.key==='ArrowDown')posY=clamp(posY+step);
+    else if(e.key==='ArrowLeft')posX=clamp(posX-step);
+    else if(e.key==='ArrowRight')posX=clamp(posX+step);
+    else return;
+    e.preventDefault();apply();
+  });
+
+  document.getElementById('copy').onclick=function(){
+    var css='object-position: '+Math.round(posX)+'% '+Math.round(posY)+'%;';
+    var done=function(){var b=document.getElementById('copy');b.textContent='Copied!';setTimeout(function(){b.textContent='Copy';},1200);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(css).then(done,sel);}else sel();
+    function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById('out'));var s=getSelection();s.removeAllRanges();s.addRange(r);}
+  };
+  document.getElementById('out').onclick=function(){var r=document.createRange();r.selectNodeContents(this);var s=getSelection();s.removeAllRanges();s.addRange(r);};
+  document.getElementById('reset').onclick=function(){posX=DEF.x;posY=DEF.y;apply();};
+  document.getElementById('ov').onchange=function(){
+    var d=this.checked?'':'none';
+    document.querySelectorAll('.ctx').forEach(function(el){el.style.display=d;});
+  };
+  document.getElementById('file').onchange=function(e){var f=e.target.files[0];if(f)img.src=URL.createObjectURL(f);};
+  document.getElementById('mini').onclick=function(){
+    panel.classList.toggle('min');
+    this.textContent=panel.classList.contains('min')?'frame ▴':'hide ▾';
+  };
+
+  function updHint(){
+    var o=overflow();
+    var axis = o.ox<1 ? 'Vertical framing only at this window size (the portrait image fills the width).' :
+               o.oy<1 ? 'Horizontal framing only at this size.' : 'Drag in any direction.';
+    hint.textContent='Window '+stage.clientWidth+'×'+stage.clientHeight+' · image '+
+      (img.naturalWidth||'…')+'×'+(img.naturalHeight||'…')+'. '+axis+
+      ' Tip: arrow keys nudge (Shift = bigger steps). Resize this window to match where you view the site.';
+  }
+  img.addEventListener('load',function(){posX=clamp(posX);posY=clamp(posY);apply();updHint();});
+  window.addEventListener('resize',updHint);
+  apply(); updHint();
+})();
+</script>
+</body>
+</html>
