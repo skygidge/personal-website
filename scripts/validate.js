@@ -8,6 +8,12 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 const PAGES = ["index.html", "writing.html", "photography.html", "shenzhen-daily.html", "ai-tools.html"];
+// generated full-text article pages live in clips/
+const CLIPS = fs.existsSync(path.join(ROOT, "clips"))
+  ? fs.readdirSync(path.join(ROOT, "clips")).filter((f) => f.endsWith(".html")).map((f) => "clips/" + f)
+  : [];
+// resolve an href/src found in `page` to a repo-relative path (relative to the page's own dir)
+const resolveRef = (page, ref) => path.posix.join(path.posix.dirname(page), ref).replace(/^\.\//, "");
 const IMAGE_BUDGET = 700 * 1024;   // max bytes for a referenced display image
 const PDF_BUDGET = 2 * 1024 * 1024; // article PDFs are linked downloads; looser cap
 const errors = [], warnings = [];
@@ -30,9 +36,9 @@ S.photos.forEach((p) => addRef(p.src));
 S.writing.forEach((w) => { addRef(w.pdf); addRef(w.img); });
 S.ai.forEach((p) => { addRef(p.img); (p.gallery || []).forEach(addRef); });
 
-// references inside the HTML (src/href/data-* to local paths)
-const htmlLocalRefs = new Map(); // ref -> page
-for (const page of PAGES.concat(["404.html"])) {
+// references inside the HTML (src/href/data-* to local paths), resolved repo-relative
+const htmlLocalRefs = new Map(); // resolved ref -> page
+for (const page of PAGES.concat(["404.html"], CLIPS)) {
   if (!exists(page)) continue;
   const html = read(page);
   const m = html.match(/(?:src|href|data-full|data-pdf-thumb)="([^"]+)"/g) || [];
@@ -41,7 +47,8 @@ for (const page of PAGES.concat(["404.html"])) {
     if (/^(https?:|mailto:|tel:|#|data:)/.test(v)) return;
     const clean = v.split("#")[0].split("?")[0];
     if (!clean || clean === "/") return;
-    if (!htmlLocalRefs.has(clean)) htmlLocalRefs.set(clean, page);
+    const ref = resolveRef(page, clean);
+    if (!htmlLocalRefs.has(ref)) htmlLocalRefs.set(ref, page);
   });
 }
 
@@ -80,14 +87,14 @@ const REQUIRED = [
   [/<meta property="og:image" content="[^"]+">/, "og:image"],
   [/<meta name="twitter:card" content="[^"]+">/, "twitter:card"]
 ];
-PAGES.forEach((page) => {
+PAGES.concat(CLIPS).forEach((page) => {
   if (!exists(page)) { E(`missing page: ${page}`); return; }
   const html = read(page);
   REQUIRED.forEach(([re, label]) => { if (!re.test(html)) E(`${page}: missing ${label}`); });
 });
 
 // ---------- 4b. data.js is build-input only — pages must not load it ----------
-PAGES.concat(["404.html"]).forEach((page) => {
+PAGES.concat(["404.html"], CLIPS).forEach((page) => {
   if (!exists(page)) return;
   if (/assets\/data\.js/.test(read(page))) E(`${page}: references assets/data.js (build input must not be loaded at runtime)`);
 });
@@ -95,16 +102,17 @@ PAGES.concat(["404.html"]).forEach((page) => {
 // ---------- 5. internal links / anchors resolve ----------
 const idCache = {};
 const idsOf = (page) => (idCache[page] ||= new Set((read(page).match(/id="([^"]+)"/g) || []).map((s) => s.slice(4, -1))));
-PAGES.concat(["404.html"]).forEach((page) => {
+PAGES.concat(["404.html"], CLIPS).forEach((page) => {
   if (!exists(page)) return;
   const html = read(page);
   (html.match(/href="([^"]+)"/g) || []).forEach((raw) => {
     const v = decode(raw.slice(6, -1));
     if (/^(https?:|mailto:|tel:|data:)/.test(v)) return;
     const [p, anchor] = v.split("#");
-    let target = p;
-    if (p === "" ) target = page;          // same-page anchor
+    let target;
+    if (p === "") target = page;                       // same-page anchor
     else if (p === "/") target = "index.html";
+    else target = resolveRef(page, p);                 // resolve relative to this page's dir
     if (/\.html$/.test(target) || target === page) {
       if (!exists(target)) { E(`${page}: link to missing page ${v}`); return; }
       if (anchor && !idsOf(target).has(anchor)) E(`${page}: broken anchor #${anchor} -> ${target}`);
@@ -113,7 +121,7 @@ PAGES.concat(["404.html"]).forEach((page) => {
 });
 
 // ---------- report ----------
-console.log(`\nValidate: ${PAGES.length} pages, ${allRefs.size} asset refs checked.`);
+console.log(`\nValidate: ${PAGES.length} pages + ${CLIPS.length} clips, ${allRefs.size} asset refs checked.`);
 if (warnings.length) { console.log(`\n${warnings.length} warning(s):`); warnings.forEach((w) => console.log("  ⚠ " + w)); }
 if (errors.length) {
   console.log(`\n${errors.length} error(s):`);
