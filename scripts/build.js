@@ -273,7 +273,7 @@ function renderClip(a) {
   .lab{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
   .top{position:fixed;top:0;left:0;right:0;z-index:60;height:62px;display:flex;align-items:center;
     background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line-2)}
-  .top .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1000px}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1000px;width:100%}
   .back{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.14em;
     text-transform:uppercase;color:var(--soft);transition:color .2s,gap .2s}
   .back:hover{color:var(--ink);gap:12px}
