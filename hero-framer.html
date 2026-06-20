@@ -15,7 +15,7 @@
 
   .stage{position:fixed;inset:0;overflow:hidden;background:#0a0908;cursor:grab;touch-action:none}
   .stage.drag{cursor:grabbing}
-  .stage img{width:100%;height:100%;object-fit:cover;object-position:50% 16%;display:block;
+  .stage img{width:100%;height:100%;object-fit:cover;object-position:50% 38%;display:block;
     user-select:none;-webkit-user-drag:none;pointer-events:none}
   .overlay{position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(180deg,rgba(18,17,16,.5) 0%,rgba(18,17,16,0) 26%,rgba(18,17,16,.18) 60%,rgba(18,17,16,.96) 100%)}
@@ -68,7 +68,7 @@
     </div>
     <div class="body">
       <p class="desc">Drag the image to frame it. Copy the value below and send it to me — I'll apply it to the live hero.</p>
-      <div class="out" id="out" title="Click to select">object-position: <b id="val">50% 16%</b></div>
+      <div class="out" id="out" title="Click to select">object-position: <b id="val">50% 38%</b></div>
       <div class="row">
         <button class="btn" id="copy">Copy</button>
         <button class="btn" id="reset">Reset</button>
@@ -86,7 +86,7 @@
   var stage=document.getElementById('stage'), img=document.getElementById('img'),
       val=document.getElementById('val'), hint=document.getElementById('hint'),
       panel=document.getElementById('panel');
-  var DEF={x:50,y:16}, posX=DEF.x, posY=DEF.y;
+  var DEF={x:50,y:38}, posX=DEF.x, posY=DEF.y;
   var clamp=function(v){return Math.max(0,Math.min(100,v));};
 
   function apply(){
