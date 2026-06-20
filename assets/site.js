@@ -102,7 +102,46 @@
     });
   }
 
-  function init() { initReveal(); initChrome(); initLightbox(); }
+  // ---------- robust in-page anchor scrolling ----------
+  // Lazy images below the fold (e.g. the AI-card .shot images) have no reserved
+  // height, so the first jump to #contact lands short; re-aim as the page settles.
+  function anchorScroll(target) {
+    var stop = false, lastTop = -1, checks = 0;
+    var cancel = function () { stop = true; };
+    ["wheel", "touchmove", "keydown"].forEach(function (ev) {
+      window.addEventListener(ev, cancel, { once: true, passive: true });
+    });
+    var aim = function () { target.scrollIntoView({ behavior: "smooth", block: "start" }); };
+    aim();
+    lastTop = target.getBoundingClientRect().top + window.scrollY;
+    var iv = setInterval(function () {
+      if (stop) { clearInterval(iv); return; }
+      var nowTop = target.getBoundingClientRect().top + window.scrollY;
+      if (Math.abs(nowTop - lastTop) > 4) { lastTop = nowTop; aim(); } // page grew — re-aim
+      if (++checks > 12) clearInterval(iv);                            // give up after ~2.4s
+    }, 200);
+  }
+  function targetOf(hash) {
+    if (!hash || hash.length < 2) return null;
+    try { return document.getElementById(decodeURIComponent(hash.slice(1))); } catch (e) { return null; }
+  }
+  function initAnchors() {
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      var t = targetOf(a.getAttribute("href"));
+      if (!t) return;
+      e.preventDefault();
+      var top = a.closest(".top"); if (top) top.classList.remove("navopen");
+      if (history.pushState) history.pushState(null, "", a.getAttribute("href"));
+      anchorScroll(t);
+    });
+    // arriving via a cross-page hash (e.g. index.html#contact) lands short too
+    var t = targetOf(location.hash);
+    if (t) requestAnimationFrame(function () { anchorScroll(t); });
+  }
+
+  function init() { initReveal(); initChrome(); initLightbox(); initAnchors(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();
