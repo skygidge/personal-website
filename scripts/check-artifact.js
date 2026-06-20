@@ -40,6 +40,22 @@ fs.readdirSync(OUT).filter((f) => /\.html$/.test(f)).forEach((f) => {
     errors.push(`${f} references assets/data.js`);
 });
 
+// Every local URL advertised in the sitemap must exist inside the artifact.
+const SITE = "https://skythomasgidge.com";
+const smPath = path.join(OUT, "sitemap.xml");
+if (!fs.existsSync(smPath)) errors.push("sitemap.xml missing from artifact");
+else {
+  const sm = fs.readFileSync(smPath, "utf8");
+  (sm.match(/<loc>([^<]+)<\/loc>/g) || []).forEach((m) => {
+    const loc = m.replace(/<\/?loc>/g, "").trim();
+    if (loc.slice(0, SITE.length) !== SITE) return;
+    let rel = loc.slice(SITE.length).replace(/^\//, "").split(/[#?]/)[0];
+    if (rel === "") rel = "index.html";
+    else if (rel.endsWith("/")) rel += "index.html";
+    if (!fs.existsSync(path.join(OUT, rel))) errors.push("sitemap URL not in artifact: " + loc + " (expected _site/" + rel + ")");
+  });
+}
+
 if (errors.length) {
   console.error(`\nArtifact check FAILED (${errors.length}):`);
   errors.forEach((e) => console.error("  ✗ " + e));

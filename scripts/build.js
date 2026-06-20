@@ -53,6 +53,7 @@ function headMeta(file) {
   const m = META[file];
   const canonical = SITE + m.path;
   return [
+    `<link rel="icon" href="/favicon.svg">`,
     `<meta name="description" content="${attr(m.desc)}">`,
     `<link rel="canonical" href="${url(canonical)}">`,
     `<meta property="og:type" content="website">`,
@@ -239,6 +240,7 @@ function renderClip(a) {
 <title>${esc(title)} — Sky Thomas Gidge</title>
   <meta name="description" content="${attr(desc)}">
   <link rel="canonical" href="${url(clipAbs(a))}">
+  <link rel="icon" href="../favicon.svg">
   <meta name="author" content="Sky Thomas Gidge">
   <meta property="article:published_time" content="${attr(a.date)}">
   <meta property="og:type" content="article">

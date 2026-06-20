@@ -14,10 +14,10 @@ const OUT = path.join(ROOT, "_site");
 // Allowlist — exactly the files the deployed site needs at runtime.
 const FILES = [
   "index.html", "writing.html", "photography.html", "shenzhen-daily.html", "ai-tools.html",
-  "404.html", "robots.txt", "sitemap.xml", "og-image.jpg", "CNAME", ".nojekyll",
+  "404.html", "robots.txt", "sitemap.xml", "og-image.jpg", "favicon.svg", "CNAME", ".nojekyll",
   "assets/site.js", "assets/pdf-thumbs.js"
 ];
-const DIRS = ["uploads"];
+const DIRS = ["uploads", "clips"];
 // Subpaths inside copied DIRS that are local-only and must not ship.
 const DIR_EXCLUDE = new Set(["uploads/used-on-site"]);
 
