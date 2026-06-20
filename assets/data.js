@@ -63,7 +63,6 @@ window.SKY = (function () {
   /* Writing — complete list with PDFs and article links. */
   const TM = "https://www.thatsmags.com/";
   const P = "uploads/";
-  const SG = "https://www.skythomasgidge.com/_files/ugd/";
   const writing = [
     /* ---- Features & investigations ---- */
     { group: "Features & investigations",
@@ -205,7 +204,7 @@ window.SKY = (function () {
       t: "The Street-Side Phone Seller", kicker: "Man on the street", pub: "That's Magazines", home: true, homeOrder: 6,
       d: "A day in the shadow economy with one of Shenzhen's informal mobile traders.",
       site: TM + "china/post/20994/a-peak-inside-the-world-of-street-side-phone-service",
-      pdf: SG + "9bfd74_80f53af8b3b645249d9775e6df89c368.pdf" },
+      pdf: P + "Street-Side Phone Seller.pdf" },
     { group: "Man on the street",
       t: "Clippings and Colors: Roadside Manicurists", kicker: "Man on the street", pub: "That's Magazines",
       d: "The street-side nail girls are so chatty the interview goes better if you don't ask questions.",
