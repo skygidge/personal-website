@@ -371,6 +371,7 @@ function groupedWriting(rowFn) {
 function sections(file) {
   if (file === "index.html") {
     const intro = esc(S.introLine).replace("usually do.", `<span class='q'>usually do.</span>`);
+    const homePhotos = S.photos.filter(p => p.home).sort((a, b) => (a.homeOrder || 99) - (b.homeOrder || 99));
     const home = S.writing.filter(w => w.home).sort((a, b) => (a.homeOrder || 99) - (b.homeOrder || 99));
     const restGroups = [...new Set(S.writing.filter(w => !w.home).map(w => w.group))].length;
     const wfoot = S.writing.length > home.length
@@ -378,8 +379,9 @@ function sections(file) {
       : "";
     return {
       introLine: intro,
+      aboutSocial: socialLinks(),
       pgCount: esc(S.photos.length + " frames · night · Shenzhen / LA"),
-      pg: photoGrid(S.photos.slice(0, 8), false),
+      pg: photoGrid((homePhotos.length ? homePhotos : S.photos.slice(0, 6)), false),
       moreLabel: "See all " + S.photos.length,
       award: `<span class="dot"></span><div><div class="k">${esc(S.award.kicker)} · ${esc(S.award.pub)}</div><div class="t">${esc(S.award.t)}</div></div>`,
       wlist: home.map(homeWritingRow).join("\n") + (wfoot ? "\n" + wfoot : ""),

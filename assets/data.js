@@ -6,13 +6,13 @@ window.SKY = (function () {
   const U = "uploads/";
   const photos = [
     /* High-res selects from skythomasgidge.com/photography (1400px+) */
-    { src: U + "wix_a7aba162.jpg", cap: "Shopkeeper", loc: "Street", o: "l", sel: true },
+    { src: U + "wix_a7aba162.jpg", cap: "Shopkeeper", loc: "Street", o: "l", sel: true, home: true, homeOrder: 1 },
     { src: U + "wix_5b1c2e3d.jpg", cap: "Rooftop, last light", loc: "Shenzhen", o: "p", hero: true, sel: true },
     { src: U + "wix_2ca1bc56.jpg", cap: "Underpass sun", loc: "Portrait", o: "p", sel: true },
-    { src: U + "wix_96d96f50.jpg", cap: "Ping An, blue", loc: "Futian", o: "p", sel: true },
+    { src: U + "wix_96d96f50.jpg", cap: "Ping An, blue", loc: "Futian", o: "p", sel: true, home: true, homeOrder: 2 },
     { src: U + "wix_9460629f.jpg", cap: "Umbrella", loc: "Night rain", o: "p", sel: true },
     { src: U + "wix_3a93630c.jpg", cap: "Smoke", loc: "Portrait", o: "p", sel: true },
-    { src: U + "1774845159427.publer.com-835b1930.jpg", cap: "Arcs", loc: "Light installation", o: "p", sel: true },
+    { src: U + "1774845159427.publer.com-835b1930.jpg", cap: "Arcs", loc: "Light installation", o: "p", sel: true, home: true, homeOrder: 3 },
     { src: U + "wix_cf3b350f.jpg", cap: "Interchange, dusk", loc: "Rooftop", o: "l", sel: true },
     { src: U + "wix_5b45413a.jpg", cap: "Stage pair", loc: "Live show", o: "p" },
     { src: U + "wix_a70d58b4.jpg", cap: "Green room", loc: "Portrait", o: "p" },
@@ -21,10 +21,10 @@ window.SKY = (function () {
     { src: U + "wix_faef8976.jpg", cap: "Storm sunset", loc: "Harbor", o: "l" },
     /* Instagram pulls */
     { src: U + "1774845017950.publer.com.jpg", cap: "Rooftop", loc: "Futian, Shenzhen", o: "p" },
-    { src: U + "1774844710598.publer.com.jpg", cap: "Green", loc: "Portrait", o: "p" },
+    { src: U + "1774844710598.publer.com.jpg", cap: "Green", loc: "Portrait", o: "p", home: true, homeOrder: 4 },
     { src: U + "1774844815277.publer.com.jpg", cap: "Reaching", loc: "Street", o: "p" },
     { src: U + "1774845628205.publer.com.jpg", cap: "手机配件", loc: "Shatou, Shenzhen", o: "p" },
-    { src: U + "1774845209589.publer.com.jpg", cap: "Singularity", loc: "Lobby", o: "p" },
+    { src: U + "1774845209589.publer.com.jpg", cap: "Singularity", loc: "Lobby", o: "p", home: true, homeOrder: 8 },
     { src: U + "1774844598342.publer.com.jpg", cap: "After rain", loc: "Futian, Shenzhen", o: "p" },
     { src: U + "1774844600339.publer.com.jpg", cap: "Blue towers", loc: "Overpass", o: "p" },
     { src: U + "1774844601337.publer.com.jpg", cap: "No sky", loc: "Nanshan", o: "p" },
@@ -46,16 +46,16 @@ window.SKY = (function () {
     { src: U + "9bfd74_d6c703a834264c728bcb65598328d911~mv2.jpg", cap: "LED pair", loc: "Rooftop", o: "l" },
     { src: U + "9bfd74_d7723d69af7a4738ac33bd7827335f15~mv2.jpg", cap: "Sunrise haze", loc: "Skyline", o: "l" },
     /* New uploads */
-    { src: U + "654164442_18124179865582061_1332678849228633830_n.jpg", cap: "KK100", loc: "Drone", o: "p" },
+    { src: U + "654164442_18124179865582061_1332678849228633830_n.jpg", cap: "KK100", loc: "Drone", o: "p", home: true, homeOrder: 5 },
     { src: U + "660368769_18173366941399517_7856450981248004432_n.jpg", cap: "KK100, overhead", loc: "Drone", o: "p" },
-    { src: U + "626589022_18318447889301650_133568592508066338_n.jpg", cap: "Ping An, fog", loc: "Futian", o: "p" },
+    { src: U + "626589022_18318447889301650_133568592508066338_n.jpg", cap: "Ping An, fog", loc: "Futian", o: "p", home: true, homeOrder: 7 },
     { src: U + "624085527_18188780236357184_1091364875619319864_n.jpg", cap: "Catwalk", loc: "Rooftop", o: "p" },
     { src: U + "650110617_18033491057592120_1453627557044224828_n.jpg", cap: "Smoke break", loc: "Street", o: "p" },
     { src: U + "656194520_18332473513220532_5899228606187932641_n.jpg", cap: "Onlookers", loc: "Museum", o: "p" },
     { src: U + "649225512_18085059593246520_186182321330016461_n.jpg", cap: "Hand", loc: "Detail", o: "p" },
     { src: U + "629786730_18393072844195956_698995262378286313_n.jpg", cap: "Bell", loc: "Portrait", o: "p" },
     { src: U + "623052680_18310111390253619_3350103299258808604_n.jpg", cap: "Through the lens", loc: "Portrait", o: "p" },
-    { src: U + "654661188_18130833331529128_5641409037700819593_n.jpg", cap: "Dune", loc: "California", o: "p" },
+    { src: U + "654661188_18130833331529128_5641409037700819593_n.jpg", cap: "Dune", loc: "California", o: "p", home: true, homeOrder: 6 },
     { src: U + "pingan-building-11.jpg", cap: "City watchers", loc: "Shenzhen", o: "p" },
     { src: U + "pingan-building-12.jpg", cap: "On the edge", loc: "Rooftop", o: "p" }
   ];
@@ -395,7 +395,7 @@ window.SKY = (function () {
   ];
 
   const ethos = "Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — if the logic doesn't hold up in the material, the suggestion doesn't move forward.";
-  const introLine = "I'm a video editor, producer, photographer and journalist who lately spends a worrying amount of time building AI tools. Most of the photos were taken at night in Shenzhen. The tools were built to save time, and usually do.";
+  const introLine = "Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.";
 
   const identity = {
     name: "Sky Thomas Gidge",

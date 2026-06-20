@@ -67,7 +67,6 @@
   .hero .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;padding-bottom:54px}
   .hero .cap .nm{font-family:var(--serif);font-size:clamp(34px,5.6vw,68px);line-height:1.02;letter-spacing:-.015em;
     font-weight:400}
-  .hero .cap .tag{margin-top:16px;max-width:50ch;font-size:clamp(15px,1.7vw,18px);line-height:1.55;color:#d7d1c5}
   .hero .scroll{position:absolute;right:40px;bottom:56px;z-index:2;display:flex;align-items:center;gap:10px;
     font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
   .hero .scroll .ln{width:30px;height:1px;background:var(--soft);position:relative;overflow:hidden}
@@ -78,10 +77,14 @@
 
   /* intro strip */
   .intro{padding:84px 0 70px;border-bottom:1px solid var(--line-2)}
-  .intro .grid{display:grid;grid-template-columns:160px 1fr;gap:34px;align-items:start}
+  .intro .grid{display:grid;grid-template-columns:160px 1fr auto;gap:34px;align-items:start}
   .intro p{font-family:var(--serif);font-size:clamp(21px,2.5vw,29px);line-height:1.45;letter-spacing:-.005em;
     max-width:30ch;color:var(--ink)}
   .intro p .q{color:var(--soft)}
+  .intro .social{display:flex;flex-direction:column;align-items:flex-end;gap:10px;align-self:end;text-align:right}
+  .intro .social a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--soft);transition:color .2s}
+  .intro .social a:hover{color:var(--accent)}
 
   /* section frame */
   section{padding:78px 0;border-bottom:1px solid var(--line-2);scroll-margin-top:62px}
@@ -215,6 +218,7 @@
     .aigrid,.ai-intro,.foot-top{grid-template-columns:1fr}
     .aic.span2{grid-column:span 1}
     .intro .grid{grid-template-columns:1fr;gap:16px}
+    .intro .social{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:12px 20px}
     .wlist .w{grid-template-columns:1fr !important}
     .wlist .w.has-thumb{grid-template-columns:100px 1fr !important;column-gap:18px}
     .wlist .w.has-thumb .wside{grid-column:1 / -1}
@@ -236,9 +240,9 @@
   <div class="top" id="top"><div class="wrap">
     <div class="mark"><span class="nm">Sky Thomas Gidge</span><span class="rl">Shenzhen / LA</span></div>
     <nav onclick="this.closest('.top').classList.remove('navopen')">
-      <a href="#writing">Writing</a>
-      <a href="#ai">AI</a>
       <a href="#photography">Photography</a>
+      <a href="#ai">AI</a>
+      <a href="#writing">Writing</a>
       <a href="#contact">Contact</a>
     </nav>
     <button class="navtoggle" aria-label="Menu" onclick="this.closest('.top').classList.toggle('navopen')">☰</button>
@@ -249,7 +253,6 @@
     <div class="photo-meta lab">Futian · blue hour</div>
     <div class="cap wrap">
       <div class="nm">Sky Thomas Gidge</div>
-      <p class="tag">Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of small AI tools — and a newsletter about AI.</p>
     </div>
     <div class="scroll"><span>Scroll</span><span class="ln"></span></div>
   </header>
@@ -259,8 +262,11 @@
       <div class="wrap"><div class="grid">
         <span class="lab">About</span>
         <p id="introLine"><!--BUILD:introLine-->
-I&#39;m a video editor, producer, photographer and journalist who lately spends a worrying amount of time building AI tools. Most of the photos were taken at night in Shenzhen. The tools were built to save time, and <span class='q'>usually do.</span>
+Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.
 <!--/BUILD:introLine--></p>
+        <div class="social" id="aboutSocial"><!--BUILD:aboutSocial-->
+<a href="https://www.linkedin.com/in/skygidge/" target="_blank" rel="noopener me">LinkedIn</a><a href="https://www.instagram.com/skythomasgidge" target="_blank" rel="noopener me">Instagram</a><a href="https://x.com/SkyThomasGidge" target="_blank" rel="noopener me">Twitter / X</a>
+<!--/BUILD:aboutSocial--></div>
       </div></div>
     </section>
 
@@ -271,13 +277,13 @@ I&#39;m a video editor, producer, photographer and journalist who lately spends 
 <!--/BUILD:pgCount--></span></div>
         <div class="pg" id="pg"><!--BUILD:pg-->
 <div class="cell" data-lb="photos" data-full="uploads/wix_a7aba162.jpg" data-cap="Shopkeeper" data-loc="Street"><img src="uploads/wix_a7aba162.jpg" alt="Shopkeeper" loading="lazy"><div class="ov"></div><span class="n">01</span><span class="cp">Shopkeeper · Street</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/wix_5b1c2e3d.jpg" data-cap="Rooftop, last light" data-loc="Shenzhen"><img src="uploads/wix_5b1c2e3d.jpg" alt="Rooftop, last light" loading="lazy"><div class="ov"></div><span class="n">02</span><span class="cp">Rooftop, last light · Shenzhen</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/wix_2ca1bc56.jpg" data-cap="Underpass sun" data-loc="Portrait"><img src="uploads/wix_2ca1bc56.jpg" alt="Underpass sun" loading="lazy"><div class="ov"></div><span class="n">03</span><span class="cp">Underpass sun · Portrait</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/wix_96d96f50.jpg" data-cap="Ping An, blue" data-loc="Futian"><img src="uploads/wix_96d96f50.jpg" alt="Ping An, blue" loading="lazy"><div class="ov"></div><span class="n">04</span><span class="cp">Ping An, blue · Futian</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/wix_9460629f.jpg" data-cap="Umbrella" data-loc="Night rain"><img src="uploads/wix_9460629f.jpg" alt="Umbrella" loading="lazy"><div class="ov"></div><span class="n">05</span><span class="cp">Umbrella · Night rain</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/wix_3a93630c.jpg" data-cap="Smoke" data-loc="Portrait"><img src="uploads/wix_3a93630c.jpg" alt="Smoke" loading="lazy"><div class="ov"></div><span class="n">06</span><span class="cp">Smoke · Portrait</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/1774845159427.publer.com-835b1930.jpg" data-cap="Arcs" data-loc="Light installation"><img src="uploads/1774845159427.publer.com-835b1930.jpg" alt="Arcs" loading="lazy"><div class="ov"></div><span class="n">07</span><span class="cp">Arcs · Light installation</span></div>
-<div class="cell" data-lb="photos" data-full="uploads/wix_cf3b350f.jpg" data-cap="Interchange, dusk" data-loc="Rooftop"><img src="uploads/wix_cf3b350f.jpg" alt="Interchange, dusk" loading="lazy"><div class="ov"></div><span class="n">08</span><span class="cp">Interchange, dusk · Rooftop</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/wix_96d96f50.jpg" data-cap="Ping An, blue" data-loc="Futian"><img src="uploads/wix_96d96f50.jpg" alt="Ping An, blue" loading="lazy"><div class="ov"></div><span class="n">02</span><span class="cp">Ping An, blue · Futian</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/1774845159427.publer.com-835b1930.jpg" data-cap="Arcs" data-loc="Light installation"><img src="uploads/1774845159427.publer.com-835b1930.jpg" alt="Arcs" loading="lazy"><div class="ov"></div><span class="n">03</span><span class="cp">Arcs · Light installation</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/1774844710598.publer.com.jpg" data-cap="Green" data-loc="Portrait"><img src="uploads/1774844710598.publer.com.jpg" alt="Green" loading="lazy"><div class="ov"></div><span class="n">04</span><span class="cp">Green · Portrait</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/654164442_18124179865582061_1332678849228633830_n.jpg" data-cap="KK100" data-loc="Drone"><img src="uploads/654164442_18124179865582061_1332678849228633830_n.jpg" alt="KK100" loading="lazy"><div class="ov"></div><span class="n">05</span><span class="cp">KK100 · Drone</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/654661188_18130833331529128_5641409037700819593_n.jpg" data-cap="Dune" data-loc="California"><img src="uploads/654661188_18130833331529128_5641409037700819593_n.jpg" alt="Dune" loading="lazy"><div class="ov"></div><span class="n">06</span><span class="cp">Dune · California</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/626589022_18318447889301650_133568592508066338_n.jpg" data-cap="Ping An, fog" data-loc="Futian"><img src="uploads/626589022_18318447889301650_133568592508066338_n.jpg" alt="Ping An, fog" loading="lazy"><div class="ov"></div><span class="n">07</span><span class="cp">Ping An, fog · Futian</span></div>
+<div class="cell" data-lb="photos" data-full="uploads/1774845209589.publer.com.jpg" data-cap="Singularity" data-loc="Lobby"><img src="uploads/1774845209589.publer.com.jpg" alt="Singularity" loading="lazy"><div class="ov"></div><span class="n">08</span><span class="cp">Singularity · Lobby</span></div>
 <!--/BUILD:pg--></div>
         <div class="pg-foot">
           <span class="lab">Click any frame to enlarge</span>
@@ -288,69 +294,9 @@ See all 50
       </div>
     </section>
 
-    <section id="writing">
-      <div class="wrap">
-        <div class="sh"><span class="idx">02</span><h2>Writing</h2><span class="ct lab">A selection — more in the archive</span></div>
-        <div class="award" id="award"><!--BUILD:award-->
-<span class="dot"></span><div><div class="k">Award · Shenzhen Press Group · 深圳报业集团</div><div class="t">Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily</div></div>
-<!--/BUILD:award--></div>
-        <div class="wlist" id="wlist"><!--BUILD:wlist-->
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener" aria-label="Read: Under Fire: How Easy Is It to Get a Gun in China?"></a>
-  <div><div class="wk">Investigation</div>
-  <a class="wt" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener">Under Fire: How Easy Is It to Get a Gun in China?</a>
-  <div class="wd">The grey zones and black markets that supply China&#39;s gun buyers — reported from the seller side.</div><div class="wn">Ran in print. Never made it online — the censors saw to that. The PDF is the whole story.</div></div>
-  <div class="wside"><div class="wp">Print only</div><div class="wacts"><a href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a><span class="censored">Censored — print only</span></div></div>
-</div>
-<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="clips/hundreds-held-in-police-raids-tested-for-drugs.html" aria-label="Read: Hundreds Held in Police Raids, Tested for Drugs"><img src="uploads/mmexport1456120953563.jpg.webp" alt="" loading="lazy"></a>
-  <div><div class="wk">Breaking news</div>
-  <a class="wt" href="clips/hundreds-held-in-police-raids-tested-for-drugs.html">Hundreds Held in Police Raids, Tested for Drugs</a>
-  <div class="wd">Breaking coverage of a massive police operation sweeping Shenzhen&#39;s entertainment district — the story behind the Excellence in Journalism Award.</div><div class="wn">Won the Excellence in Journalism Award. Quoted by international press, including The Guardian.</div></div>
-  <div class="wside"><div class="wp">Shenzhen Daily</div><div class="wacts"><a href="http://www.szdaily.com/content/2016-02/22/content_12832950.htm" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
-</div>
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2017-03 - The Hukou&#39;s Human Cost.pdf" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener" aria-label="Read: The Hukou&#39;s Human Cost"></a>
-  <div><div class="wk">Cover story</div>
-  <a class="wt" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener">The Hukou&#39;s Human Cost</a>
-  <div class="wd">How the household-registration system traps millions — opening with the suicide note of four left-behind children.</div></div>
-  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/2017-03 - The Hukou&#39;s Human Cost.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
-</div>
-<div class="w">
-  <div><div class="wk">Investigation</div>
-  <a class="wt" href="clips/the-other-job-requirement-be-white.html">The Other Job Requirement: Be White</a>
-  <div class="wd">Racial discrimination in China&#39;s English teaching industry — where being a native speaker matters less than looking the part.</div></div>
-  <div class="wside"><div class="wp">Shenzhen Daily</div><div class="wacts"><a href="http://www.szdaily.com/content/2015-08/31/content_12185589.htm" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
-</div>
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-12 - Dama Drama - Why Do People Hate China&#39;s Dancing Grandmas.pdf" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener" aria-label="Read: Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?"></a>
-  <div><div class="wk">City feature</div>
-  <a class="wt" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener">Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?</a>
-  <div class="wd">The first generation of lonely mothers in China&#39;s history — and the neighbors at war with their loudspeakers.</div></div>
-  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/2016-12 - Dama Drama - Why Do People Hate China&#39;s Dancing Grandmas.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
-</div>
-<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener" aria-label="Read: The Street-Side Phone Seller"><img src="uploads/street-side-phone-seller.jpg" alt="" loading="lazy"></a>
-  <div><div class="wk">Man on the street</div>
-  <a class="wt" href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener">The Street-Side Phone Seller</a>
-  <div class="wd">A day in the shadow economy with one of Shenzhen&#39;s informal mobile traders.</div></div>
-  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/Street-Side Phone Seller.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
-</div>
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-10 - Gotta Smoke - What Your Cigs Say About You.pdf" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener" aria-label="Read: Gotta Smoke? What Your Cigs Say About You"></a>
-  <div><div class="wk">Humor</div>
-  <a class="wt" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener">Gotta Smoke? What Your Cigs Say About You</a>
-  <div class="wd">Five famous Chinese cigarette brands and what smoking them says about you.</div></div>
-  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/2016-10 - Gotta Smoke - What Your Cigs Say About You.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
-</div>
-<div class="w">
-  <div><div class="wk">Humor</div>
-  <a class="wt" href="https://www.thatsmags.com/china/post/14723/bang-for-your-buck-cheap-dates" target="_blank" rel="noopener">Bang for Your Buck: Cheap Dates</a>
-  <div class="wd">Romance on a budget in the world&#39;s hardware capital.</div><div class="wn">One of the most-read things I wrote. Also the most fun to write — the two are probably related.</div></div>
-  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/14723/bang-for-your-buck-cheap-dates" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
-</div>
-<div class="wlist-foot"><a class="more" href="writing.html"><span>See 49 more articles</span><span class="ar">→</span></a><span class="lab">a selection across 8 sections</span></div>
-<!--/BUILD:wlist--></div>
-      </div>
-    </section>
-
     <section id="ai">
       <div class="wrap">
-        <div class="sh"><span class="idx">03</span><h2>AI tools</h2><span class="ct lab">8 built · 3 live</span></div>
+        <div class="sh"><span class="idx">02</span><h2>AI tools</h2><span class="ct lab">8 built · 3 live</span></div>
         <div class="ai-intro">
           <p class="big rv">Eight projects so far. Two run on their own — I check on them like houseplants. The rule is simple: <b>Claude's a collaborator, not the last word.</b></p>
           <p class="side rv">Everything it suggests gets traced back to the source before it ships. Some of it holds up, some doesn't — knowing the difference is most of the job. None of these are demos; they all save real time.</p>
@@ -405,6 +351,66 @@ See all 50
   <div class="tags"><span>Transcribed footage</span><span>Human-checked</span></div>
   </div>
 <!--/BUILD:aigrid--></div>
+      </div>
+    </section>
+
+    <section id="writing">
+      <div class="wrap">
+        <div class="sh"><span class="idx">03</span><h2>Writing</h2><span class="ct lab">A selection — more in the archive</span></div>
+        <div class="award" id="award"><!--BUILD:award-->
+<span class="dot"></span><div><div class="k">Award · Shenzhen Press Group · 深圳报业集团</div><div class="t">Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily</div></div>
+<!--/BUILD:award--></div>
+        <div class="wlist" id="wlist"><!--BUILD:wlist-->
+<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener" aria-label="Read: Under Fire: How Easy Is It to Get a Gun in China?"></a>
+  <div><div class="wk">Investigation</div>
+  <a class="wt" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener">Under Fire: How Easy Is It to Get a Gun in China?</a>
+  <div class="wd">The grey zones and black markets that supply China&#39;s gun buyers — reported from the seller side.</div><div class="wn">Ran in print. Never made it online — the censors saw to that. The PDF is the whole story.</div></div>
+  <div class="wside"><div class="wp">Print only</div><div class="wacts"><a href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a><span class="censored">Censored — print only</span></div></div>
+</div>
+<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="clips/hundreds-held-in-police-raids-tested-for-drugs.html" aria-label="Read: Hundreds Held in Police Raids, Tested for Drugs"><img src="uploads/mmexport1456120953563.jpg.webp" alt="" loading="lazy"></a>
+  <div><div class="wk">Breaking news</div>
+  <a class="wt" href="clips/hundreds-held-in-police-raids-tested-for-drugs.html">Hundreds Held in Police Raids, Tested for Drugs</a>
+  <div class="wd">Breaking coverage of a massive police operation sweeping Shenzhen&#39;s entertainment district — the story behind the Excellence in Journalism Award.</div><div class="wn">Won the Excellence in Journalism Award. Quoted by international press, including The Guardian.</div></div>
+  <div class="wside"><div class="wp">Shenzhen Daily</div><div class="wacts"><a href="http://www.szdaily.com/content/2016-02/22/content_12832950.htm" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
+</div>
+<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2017-03 - The Hukou&#39;s Human Cost.pdf" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener" aria-label="Read: The Hukou&#39;s Human Cost"></a>
+  <div><div class="wk">Cover story</div>
+  <a class="wt" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener">The Hukou&#39;s Human Cost</a>
+  <div class="wd">How the household-registration system traps millions — opening with the suicide note of four left-behind children.</div></div>
+  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/2017-03 - The Hukou&#39;s Human Cost.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
+</div>
+<div class="w">
+  <div><div class="wk">Investigation</div>
+  <a class="wt" href="clips/the-other-job-requirement-be-white.html">The Other Job Requirement: Be White</a>
+  <div class="wd">Racial discrimination in China&#39;s English teaching industry — where being a native speaker matters less than looking the part.</div></div>
+  <div class="wside"><div class="wp">Shenzhen Daily</div><div class="wacts"><a href="http://www.szdaily.com/content/2015-08/31/content_12185589.htm" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
+</div>
+<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-12 - Dama Drama - Why Do People Hate China&#39;s Dancing Grandmas.pdf" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener" aria-label="Read: Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?"></a>
+  <div><div class="wk">City feature</div>
+  <a class="wt" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener">Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?</a>
+  <div class="wd">The first generation of lonely mothers in China&#39;s history — and the neighbors at war with their loudspeakers.</div></div>
+  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/2016-12 - Dama Drama - Why Do People Hate China&#39;s Dancing Grandmas.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
+</div>
+<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener" aria-label="Read: The Street-Side Phone Seller"><img src="uploads/street-side-phone-seller.jpg" alt="" loading="lazy"></a>
+  <div><div class="wk">Man on the street</div>
+  <a class="wt" href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener">The Street-Side Phone Seller</a>
+  <div class="wd">A day in the shadow economy with one of Shenzhen&#39;s informal mobile traders.</div></div>
+  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/Street-Side Phone Seller.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
+</div>
+<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-10 - Gotta Smoke - What Your Cigs Say About You.pdf" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener" aria-label="Read: Gotta Smoke? What Your Cigs Say About You"></a>
+  <div><div class="wk">Humor</div>
+  <a class="wt" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener">Gotta Smoke? What Your Cigs Say About You</a>
+  <div class="wd">Five famous Chinese cigarette brands and what smoking them says about you.</div></div>
+  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/2016-10 - Gotta Smoke - What Your Cigs Say About You.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
+</div>
+<div class="w">
+  <div><div class="wk">Humor</div>
+  <a class="wt" href="https://www.thatsmags.com/china/post/14723/bang-for-your-buck-cheap-dates" target="_blank" rel="noopener">Bang for Your Buck: Cheap Dates</a>
+  <div class="wd">Romance on a budget in the world&#39;s hardware capital.</div><div class="wn">One of the most-read things I wrote. Also the most fun to write — the two are probably related.</div></div>
+  <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/14723/bang-for-your-buck-cheap-dates" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
+</div>
+<div class="wlist-foot"><a class="more" href="writing.html"><span>See 49 more articles</span><span class="ar">→</span></a><span class="lab">a selection across 8 sections</span></div>
+<!--/BUILD:wlist--></div>
       </div>
     </section>
 
