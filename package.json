@@ -8,6 +8,7 @@
     "package": "node scripts/package.js",
     "check-artifact": "node scripts/check-artifact.js",
     "optimize": "node scripts/optimize-images.js",
+    "check-links": "node scripts/check-links.js",
     "validate": "node scripts/validate.js",
     "test": "node scripts/validate.js"
   },

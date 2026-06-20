@@ -358,7 +358,7 @@ function sections(file) {
     const home = S.writing.filter(w => w.home).sort((a, b) => (a.homeOrder || 99) - (b.homeOrder || 99));
     const restGroups = [...new Set(S.writing.filter(w => !w.home).map(w => w.group))].length;
     const wfoot = S.writing.length > home.length
-      ? `<div class="wlist-foot"><a class="more" href="writing.html"><span>See all ${S.writing.length} articles</span><span class="ar">→</span></a><span class="lab">${S.writing.length - home.length} more across ${restGroups} sections</span></div>`
+      ? `<div class="wlist-foot"><a class="more" href="writing.html"><span>See ${S.writing.length - home.length} more articles</span><span class="ar">→</span></a><span class="lab">a selection across ${restGroups} sections</span></div>`
       : "";
     return {
       introLine: intro,

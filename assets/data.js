@@ -203,6 +203,7 @@ window.SKY = (function () {
     { group: "Man on the street",
       t: "The Street-Side Phone Seller", kicker: "Man on the street", pub: "That's Magazines", home: true, homeOrder: 6,
       d: "A day in the shadow economy with one of Shenzhen's informal mobile traders.",
+      img: P + "street-side-phone-seller.jpg",
       site: TM + "china/post/20994/a-peak-inside-the-world-of-street-side-phone-service",
       pdf: P + "Street-Side Phone Seller.pdf" },
     { group: "Man on the street",
