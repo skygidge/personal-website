@@ -81,10 +81,24 @@ function photoCell(p, i, withLand) {
 }
 const photoGrid = (photos, withLand) => photos.map((p, i) => photoCell(p, i, withLand)).join("\n");
 
+// The article a writing entry points to: prefer our on-site full-text clip,
+// then the original publication, then the magazine PDF. Thumb + title share it.
+function articleLink(w) {
+  const clip = artByDate.get(w.date);
+  if (clip) return { href: clipHref(clip), ext: false };
+  if (w.site) return { href: w.site, ext: true };
+  if (w.pdf)  return { href: w.pdf,  ext: true };
+  return null;
+}
 function thumbHtml(w) {
-  if (w.img) return `<div class="w-thumb thumb-loaded"><img src="${url(w.img)}" alt="" loading="lazy"></div>`;
-  if (w.pdf) return `<div class="w-thumb" data-pdf-thumb="${url(w.pdf)}"></div>`;
-  return "";
+  let cls, body = "", extra = "";
+  if (w.img) { cls = "w-thumb thumb-loaded"; body = `<img src="${url(w.img)}" alt="" loading="lazy">`; }
+  else if (w.pdf) { cls = "w-thumb"; extra = ` data-pdf-thumb="${url(w.pdf)}"`; }
+  else return "";
+  const L = articleLink(w);
+  if (!L) return `<div class="${cls}"${extra}>${body}</div>`;
+  const ext = L.ext ? ` target="_blank" rel="noopener"` : "";
+  return `<a class="${cls}"${extra} href="${url(L.href)}"${ext} aria-label="${attr("Read: " + (w.t || ""))}">${body}</a>`;
 }
 function writingActs(w) {
   let a = "";
@@ -94,10 +108,10 @@ function writingActs(w) {
   return a;
 }
 function writingTitle(w) {
-  const href = w.site || w.pdf || "";
-  return href
-    ? `<a class="wt" href="${url(href)}" target="_blank" rel="noopener">${esc(w.t)}</a>`
-    : `<div class="wt">${esc(w.t)}</div>`;
+  const L = articleLink(w);
+  if (!L) return `<div class="wt">${esc(w.t)}</div>`;
+  const ext = L.ext ? ` target="_blank" rel="noopener"` : "";
+  return `<a class="wt" href="${url(L.href)}"${ext}>${esc(w.t)}</a>`;
 }
 // homepage writing row (body is an unclassed div)
 function homeWritingRow(w) {
