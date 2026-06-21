@@ -379,7 +379,6 @@ function sections(file) {
       : "";
     return {
       introLine: intro,
-      aboutSocial: socialLinks(),
       pgCount: esc(S.photos.length + " frames · night · Shenzhen / LA"),
       pg: photoGrid((homePhotos.length ? homePhotos : S.photos.slice(0, 6)), false),
       moreLabel: "See all " + S.photos.length,

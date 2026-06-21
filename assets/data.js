@@ -395,7 +395,7 @@ window.SKY = (function () {
   ];
 
   const ethos = "Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — if the logic doesn't hold up in the material, the suggestion doesn't move forward.";
-  const introLine = "Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.";
+  const introLine = "I'm a video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.";
 
   const identity = {
     name: "Sky Thomas Gidge",

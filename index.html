@@ -65,8 +65,9 @@
   .hero::after{content:"";position:absolute;inset:0;
     background:linear-gradient(180deg,rgba(18,17,16,0) 0%,rgba(18,17,16,0) 26%,rgba(18,17,16,.18) 60%,rgba(18,17,16,.96) 100%)}
   .hero .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;padding-bottom:54px}
-  .hero .cap .nm{font-family:var(--serif);font-size:clamp(34px,5.6vw,68px);line-height:1.02;letter-spacing:-.015em;
-    font-weight:400}
+  .hero .cap .lab{display:block;margin-bottom:14px}
+  .hero .cap .about{font-family:var(--serif);font-weight:400;font-size:clamp(23px,3.3vw,40px);line-height:1.24;
+    letter-spacing:-.01em;max-width:23ch;color:var(--ink);margin:0}
   .hero .scroll{position:absolute;right:40px;bottom:56px;z-index:2;display:flex;align-items:center;gap:10px;
     font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
   .hero .scroll .ln{width:30px;height:1px;background:var(--soft);position:relative;overflow:hidden}
@@ -74,17 +75,6 @@
     animation:slide 2s ease-in-out infinite}
   @keyframes slide{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
   .hero .photo-meta{position:absolute;left:40px;top:80px;z-index:2}
-
-  /* intro strip */
-  .intro{padding:84px 0 70px;border-bottom:1px solid var(--line-2)}
-  .intro .grid{display:grid;grid-template-columns:160px 1fr auto;gap:34px;align-items:start}
-  .intro p{font-family:var(--serif);font-size:clamp(21px,2.5vw,29px);line-height:1.45;letter-spacing:-.005em;
-    max-width:30ch;color:var(--ink)}
-  .intro p .q{color:var(--soft)}
-  .intro .social{display:flex;flex-direction:column;align-items:flex-end;gap:10px;align-self:end;text-align:right}
-  .intro .social a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--soft);transition:color .2s}
-  .intro .social a:hover{color:var(--accent)}
 
   /* section frame */
   section{padding:78px 0;border-bottom:1px solid var(--line-2);scroll-margin-top:62px}
@@ -217,8 +207,6 @@
     .pg{grid-template-columns:repeat(2,1fr)}
     .aigrid,.ai-intro,.foot-top{grid-template-columns:1fr}
     .aic.span2{grid-column:span 1}
-    .intro .grid{grid-template-columns:1fr;gap:16px}
-    .intro .social{align-items:flex-start;text-align:left;flex-direction:row;flex-wrap:wrap;gap:12px 20px}
     .wlist .w{grid-template-columns:1fr !important}
     .wlist .w.has-thumb{grid-template-columns:100px 1fr !important;column-gap:18px}
     .wlist .w.has-thumb .wside{grid-column:1 / -1}
@@ -252,24 +240,15 @@
     <img src="uploads/hero-rooftop-v2.jpg" alt="Shenzhen skyline at blue hour from a rooftop">
     <div class="photo-meta lab">Futian · blue hour</div>
     <div class="cap wrap">
-      <div class="nm">Sky Thomas Gidge</div>
+      <span class="lab">About</span>
+      <p class="about"><!--BUILD:introLine-->
+I&#39;m a video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.
+<!--/BUILD:introLine--></p>
     </div>
     <div class="scroll"><span>Scroll</span><span class="ln"></span></div>
   </header>
 
   <main>
-    <section class="intro" id="about">
-      <div class="wrap"><div class="grid">
-        <span class="lab">About</span>
-        <p id="introLine"><!--BUILD:introLine-->
-Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.
-<!--/BUILD:introLine--></p>
-        <div class="social" id="aboutSocial"><!--BUILD:aboutSocial-->
-<a href="https://www.linkedin.com/in/skygidge/" target="_blank" rel="noopener me">LinkedIn</a><a href="https://www.instagram.com/skythomasgidge" target="_blank" rel="noopener me">Instagram</a><a href="https://x.com/SkyThomasGidge" target="_blank" rel="noopener me">Twitter / X</a>
-<!--/BUILD:aboutSocial--></div>
-      </div></div>
-    </section>
-
     <section id="photography">
       <div class="wrap">
         <div class="sh"><span class="idx">01</span><h2>Photography</h2><span class="ct lab" id="pgCount"><!--BUILD:pgCount-->
