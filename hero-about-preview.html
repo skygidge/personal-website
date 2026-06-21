@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hero / About — layout preview</title>
+<!-- Local preview tool. NOT deployed (not in the Pages publish allowlist).
+     Two options for where the hero ABOUT text goes. Both options remove the big
+     "Sky Thomas Gidge" name and the social links. Pick one and tell Claude. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#121110;--ink:#ece7dc;--soft:#9a9286;--faint:#605850;--line-2:rgba(236,231,220,.07);
+    --line:rgba(236,231,220,.14);--accent:#d4663a;--mono:"JetBrains Mono",ui-monospace,monospace;
+    --serif:"Newsreader",Georgia,serif;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 40px}
+  .lab{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+
+  /* ---- hero (mirrors the live site) ---- */
+  .hero{position:relative;height:100svh;min-height:560px;overflow:hidden;background:#000}
+  .hero img{width:100%;height:100%;object-fit:cover;object-position:50% 38%;display:block;
+    transform:scale(1.05);animation:slowzoom 18s ease-out forwards}
+  @keyframes slowzoom{to{transform:scale(1)}}
+  .hero::after{content:"";position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(18,17,16,0) 0%,rgba(18,17,16,0) 26%,rgba(18,17,16,.18) 60%,rgba(18,17,16,.96) 100%)}
+  .hero .photo-meta{position:absolute;left:40px;top:80px;z-index:2}
+  .hero .scroll{position:absolute;right:40px;bottom:56px;z-index:2;display:flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
+  .hero .scroll .ln{width:30px;height:1px;background:var(--soft);position:relative;overflow:hidden}
+  .hero .scroll .ln::after{content:"";position:absolute;inset:0;background:var(--accent);animation:slide 2s ease-in-out infinite}
+  @keyframes slide{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
+
+  /* Option A — about set into the hero, lower-left where the name was */
+  .hero .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;padding-bottom:56px}
+  .hero .cap .about{font-family:var(--serif);font-weight:400;font-size:clamp(23px,3.3vw,40px);
+    line-height:1.22;letter-spacing:-.01em;max-width:21ch;color:var(--ink)}
+  .hero .cap .about .q{color:var(--soft)}
+
+  /* Option B — about stays in the strip below (social removed) */
+  .intro{padding:84px 0 70px;border-bottom:1px solid var(--line-2)}
+  .intro .grid{display:grid;grid-template-columns:160px 1fr;gap:34px;align-items:start}
+  .intro p{font-family:var(--serif);font-size:clamp(21px,2.5vw,29px);line-height:1.45;letter-spacing:-.005em;max-width:34ch;color:var(--ink)}
+  .cont{padding:70px 0;color:var(--faint);font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+
+  /* show one option at a time */
+  body.show-a .intro,body.show-a .b-only{display:none}
+  body.show-b .hero .cap{display:none}
+
+  /* ---- control panel ---- */
+  .panel{position:fixed;left:50%;transform:translateX(-50%);top:16px;z-index:30;display:flex;flex-direction:column;
+    align-items:center;gap:10px;background:rgba(20,18,16,.93);backdrop-filter:blur(10px);border:1px solid var(--line);
+    border-radius:14px;padding:13px 15px;width:min(580px,calc(100vw - 24px))}
+  .seg{display:flex;gap:6px;background:#000;border:1px solid var(--line);border-radius:11px;padding:4px}
+  .seg button{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);
+    background:none;border:0;border-radius:8px;padding:9px 13px;cursor:pointer;transition:background .2s,color .2s;white-space:nowrap}
+  .seg button.on{background:var(--accent);color:#fff}
+  .ptxt{font-family:var(--mono);font-size:11px;color:var(--soft);text-align:center;line-height:1.55;max-width:46ch}
+  .ptxt b{color:var(--ink)}
+  .note{font-family:var(--mono);font-size:10px;letter-spacing:.05em;color:var(--faint);text-align:center}
+</style>
+</head>
+<body class="show-a">
+  <header class="hero">
+    <img src="uploads/hero-rooftop-v2.jpg" alt="">
+    <div class="photo-meta lab">Futian · blue hour</div>
+    <div class="cap wrap">
+      <p class="about">Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.</p>
+    </div>
+    <div class="scroll"><span>Scroll</span><span class="ln"></span></div>
+  </header>
+
+  <section class="intro">
+    <div class="wrap"><div class="grid">
+      <span class="lab">About</span>
+      <p>Video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.</p>
+    </div></div>
+  </section>
+  <div class="b-only cont"><div class="wrap">— the rest of the homepage (Writing · Photography · AI) continues below —</div></div>
+
+  <div class="panel">
+    <div class="seg">
+      <button id="bA" class="on">Option A · About over photo</button>
+      <button id="bB">Option B · About below, clean hero</button>
+    </div>
+    <div class="ptxt" id="ptxt"></div>
+    <div class="note">Both options drop the “Sky Thomas Gidge” name and the social links.</div>
+  </div>
+
+<script>
+(function(){
+  var b=document.body,
+      bA=document.getElementById('bA'), bB=document.getElementById('bB'),
+      t=document.getElementById('ptxt');
+  var TXT={
+    a:'<b>Option A:</b> the About sits in the hero, lower-left where the name was — readable the instant the page opens, over the photo.',
+    b:'<b>Option B:</b> the hero is just the photo — clean. The About stays in the strip below (scroll down), where it is today.'
+  };
+  function set(opt){
+    b.className='show-'+opt;
+    bA.classList.toggle('on',opt==='a'); bB.classList.toggle('on',opt==='b');
+    t.innerHTML=TXT[opt];
+    if(opt==='a') window.scrollTo({top:0,behavior:'smooth'});
+  }
+  bA.onclick=function(){set('a');};
+  bB.onclick=function(){set('b');};
+  set('a');
+})();
+</script>
+</body>
+</html>
