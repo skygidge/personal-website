@@ -389,7 +389,6 @@ function sections(file) {
       award: `<span class="dot"></span><div><div class="k">${esc(S.award.kicker)} · ${esc(S.award.pub)}</div><div class="t">${esc(S.award.t)}</div></div>`,
       wlist: home.map(homeWritingRow).join("\n") + (wfoot ? "\n" + wfoot : ""),
       aigrid: S.ai.map(homeAiCard).join("\n"),
-      clients: S.identity.clients.map(c => `<li>${esc(c)}</li>`).join(""),
       social: socialLinks()
     };
   }
