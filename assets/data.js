@@ -372,7 +372,7 @@ window.SKY = (function () {
       d: "Built for the team managing influencer partnerships: it reviews creator videos faster, checks they meet FTC disclosure rules when the creator is paid, confirms the brand logo appears, and measures the video's tone. A proof of concept — and it worked.",
       tags: ["Compliance check", "Tone analysis"], metric: "FASTER VETTING" },
     { t: "AI Product Photography", status: "Experiment", span2: true,
-      d: "As AI image models have improved, product photography has gotten dramatically easier. I built a makeshift studio in our office, shot every side of our newest X4 Air camera, laid all the angles out on one sheet, and fed that to the model alongside commercials whose look I wanted to borrow. For a 360 camera we're not quite there yet — but we're very, very close.",
+      d: "As AI image models have improved, product photography has gotten dramatically easier. I built a makeshift studio in our office, shot every side of each camera, laid the angles out on one sheet, and fed that to the model alongside commercials whose look I wanted to borrow. For a 360 camera we're not quite there yet — but we're very, very close.",
       tags: ["Reference-driven", "Multi-angle input"], metric: "EVERY SIDE → ONE SHEET",
       gallery: [U + "x4-air-all-sides.jpg", U + "Gemini_Generated_Image_wdj12wwdj12wwdj1.jpg", U + "Gemini_Generated_Image_jqc9c8jqc9c8jqc9.jpg", U + "Gemini_Generated_Image_o6siifo6siifo6si.jpg", U + "Gemini_Generated_Image_vs96pfvs96pfvs96.jpg", U + "Gemini_Generated_Image_o620ppo620ppo620.jpg", U + "x4-air-fire-ice.jpg", U + "go-ultra-hands.jpg", U + "go-ultra-glow.jpg"] },
     { t: "Video Selects: Claude in the Edit Bay", status: "Cinegear", link: "https://thepromptresponse.substack.com/p/no-6-june-4-2026", linkText: "Read the write-up ↗",
@@ -390,8 +390,9 @@ window.SKY = (function () {
       d: "Turns Chinese-language long-reads into bilingual Kindle EPUBs — fetched, translated with full cultural context, sources kept, assembled side-by-side. Built so a backlog of Shenzhen crime, history, and urban-village journalism is finally readable in English.",
       tags: ["Translate w/ context", "EPUB → Kindle"], metric: "中文 → BILINGUAL" },
     { t: "Sales Analysis: David", status: "Case study",
-      d: "David was mic'd on a shoot because I was recording him. After transcribing all the footage, Claude could turn what he did and said on the floor into a data-driven snapshot of his performance — his actual sales count came out correct. The social read still needs a human, but David recognized the analysis as accurate and committed to improving. Not far off the wearable assistant Apple is rumored to be building.",
-      tags: ["Transcribed footage", "Human-checked"], metric: "TRANSCRIPT → SCORECARD" }
+      d: "One of our best salesmen, David, was mic'd during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. And accurately. Claude turned what David did and said on the floor into a data-driven snapshot of his performance. The sales count came out correct and David found the results insightful. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.",
+      tags: ["Transcribed footage", "Human-checked"], metric: "TRANSCRIPT → SCORECARD",
+      gallery: [U + "sales-analysis-david.jpg"] }
   ];
 
   const ethos = "Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — if the logic doesn't hold up in the material, the suggestion doesn't move forward.";
