@@ -26,13 +26,15 @@
 <style>
   :root{
     --bg:#121110; --panel:#1a1816; --panel-2:#211e1b; --ink:#ece7dc; --soft:#9a9286;
-    --faint:#605850; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
+    --faint:#8c8275; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
     --accent:#d4663a;
     --mono:"JetBrains Mono",ui-monospace,monospace;
     --serif:"Newsreader",Georgia,serif;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   ::selection{background:var(--accent);color:#fff}

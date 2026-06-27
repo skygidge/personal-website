@@ -3,7 +3,7 @@
    Reads assets/data.js (the single content source) and injects escaped,
    pre-rendered HTML + SEO/social meta into each page between BUILD markers.
    The deployed pages therefore contain real content in source HTML; the
-   browser only runs small enhancement scripts (site.js, pdf-thumbs.js).
+   browser only runs one small enhancement script (site.js).
    Pure Node, no dependencies. Run: npm run build */
 const fs = require("fs");
 const path = require("path");
@@ -90,15 +90,17 @@ function articleLink(w) {
   if (w.pdf)  return { href: w.pdf,  ext: true };
   return null;
 }
+// magazine PDFs are pre-rendered to static thumbnails by scripts/render-pdf-thumbs.js
+const pdfThumb = (pdf) => "uploads/thumbs/" + String(pdf).replace(/^.*\//, "").replace(/\.pdf$/i, ".jpg");
 function thumbHtml(w) {
-  let cls, body = "", extra = "";
-  if (w.img) { cls = "w-thumb thumb-loaded"; body = `<img src="${url(w.img)}" alt="" loading="lazy">`; }
-  else if (w.pdf) { cls = "w-thumb"; extra = ` data-pdf-thumb="${url(w.pdf)}"`; }
+  let body;
+  if (w.img) body = `<img src="${url(w.img)}" alt="" loading="lazy">`;
+  else if (w.pdf) body = `<img class="pdf" src="${url(pdfThumb(w.pdf))}" alt="" loading="lazy">`;
   else return "";
   const L = articleLink(w);
-  if (!L) return `<div class="${cls}"${extra}>${body}</div>`;
+  if (!L) return `<div class="w-thumb thumb-loaded">${body}</div>`;
   const ext = L.ext ? ` target="_blank" rel="noopener"` : "";
-  return `<a class="${cls}"${extra} href="${url(L.href)}"${ext} aria-label="${attr("Read: " + (w.t || ""))}">${body}</a>`;
+  return `<a class="w-thumb thumb-loaded" href="${url(L.href)}"${ext} aria-label="${attr("Read: " + (w.t || ""))}">${body}</a>`;
 }
 function writingActs(w) {
   let a = "";
@@ -274,11 +276,13 @@ function renderClip(a) {
 <style>
   :root{
     --bg:#121110; --panel:#1a1816; --ink:#ece7dc; --soft:#9a9286;
-    --faint:#605850; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
+    --faint:#8c8275; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
     --accent:#d4663a; --mono:"JetBrains Mono",ui-monospace,monospace;
     --serif:"Newsreader",Georgia,serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   ::selection{background:var(--accent);color:#fff}

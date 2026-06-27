@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sky Thomas Gidge</title>
+<title>Sky Thomas Gidge — video editor, photographer, journalist</title>
 <!--BUILD:head-->
   <link rel="icon" href="/favicon.svg">
   <meta name="description" content="Sky Thomas Gidge — video editor, photographer and journalist between Shenzhen and Los Angeles. Night photography, investigative writing, and a kit of small AI tools.">
@@ -26,13 +26,15 @@
 <style>
   :root{
     --bg:#121110; --panel:#1a1816; --panel-2:#211e1b; --ink:#ece7dc; --soft:#9a9286;
-    --faint:#605850; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
+    --faint:#8c8275; --line:rgba(236,231,220,.12); --line-2:rgba(236,231,220,.07);
     --accent:#d4663a;
     --mono:"JetBrains Mono",ui-monospace,monospace;
     --serif:"Newsreader",Georgia,serif;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   html{scroll-behavior:smooth}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);
     -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
@@ -122,7 +124,7 @@
   .w-thumb{width:130px;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:var(--panel-2);
     border:1px solid var(--line-2);transition:box-shadow .3s,transform .3s}
   .w:hover .w-thumb{box-shadow:0 6px 24px rgba(0,0,0,.5);transform:translateY(-2px)}
-  .w-thumb canvas{display:block;width:100%;height:auto}
+  .w-thumb img.pdf{display:block;width:100%;height:auto}
   .w-thumb img{display:block;width:100%;height:100%;object-fit:cover}
   .wlist .wk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
     margin-bottom:9px}
@@ -237,7 +239,8 @@
   </div></div>
 
   <header class="hero">
-    <img src="uploads/hero-rooftop-v2.jpg" alt="Shenzhen skyline at blue hour from a rooftop">
+    <h1 class="sr-only">Sky Thomas Gidge — video editor, photographer, and journalist between Shenzhen and Los Angeles</h1>
+    <img src="uploads/hero-rooftop-v2.jpg" alt="Shenzhen skyline at blue hour from a rooftop" width="1761" height="2200" fetchpriority="high" decoding="async">
     <div class="photo-meta lab">Futian · blue hour</div>
     <div class="cap wrap">
       <span class="lab">About</span>
@@ -340,7 +343,7 @@ See all 50
 <span class="dot"></span><div><div class="k">Award · Shenzhen Press Group · 深圳报业集团</div><div class="t">Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily</div></div>
 <!--/BUILD:award--></div>
         <div class="wlist" id="wlist"><!--BUILD:wlist-->
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener" aria-label="Read: Under Fire: How Easy Is It to Get a Gun in China?"></a>
+<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener" aria-label="Read: Under Fire: How Easy Is It to Get a Gun in China?"><img class="pdf" src="uploads/thumbs/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.jpg" alt="" loading="lazy"></a>
   <div><div class="wk">Investigation</div>
   <a class="wt" href="uploads/2016-09 - Under Fire - How Easy Is It To Obtain A Gun.pdf" target="_blank" rel="noopener">Under Fire: How Easy Is It to Get a Gun in China?</a>
   <div class="wd">The grey zones and black markets that supply China&#39;s gun buyers — reported from the seller side.</div><div class="wn">Ran in print. Never made it online — the censors saw to that. The PDF is the whole story.</div></div>
@@ -352,7 +355,7 @@ See all 50
   <div class="wd">Breaking coverage of a massive police operation sweeping Shenzhen&#39;s entertainment district — the story behind the Excellence in Journalism Award.</div><div class="wn">Won the Excellence in Journalism Award. Quoted by international press, including The Guardian.</div></div>
   <div class="wside"><div class="wp">Shenzhen Daily</div><div class="wacts"><a href="http://www.szdaily.com/content/2016-02/22/content_12832950.htm" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
 </div>
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2017-03 - The Hukou&#39;s Human Cost.pdf" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener" aria-label="Read: The Hukou&#39;s Human Cost"></a>
+<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener" aria-label="Read: The Hukou&#39;s Human Cost"><img class="pdf" src="uploads/thumbs/2017-03 - The Hukou&#39;s Human Cost.jpg" alt="" loading="lazy"></a>
   <div><div class="wk">Cover story</div>
   <a class="wt" href="https://www.thatsmags.com/shenzhen/post/18387/the-human-cost-of-china-s-hukou-system" target="_blank" rel="noopener">The Hukou&#39;s Human Cost</a>
   <div class="wd">How the household-registration system traps millions — opening with the suicide note of four left-behind children.</div></div>
@@ -364,7 +367,7 @@ See all 50
   <div class="wd">Racial discrimination in China&#39;s English teaching industry — where being a native speaker matters less than looking the part.</div></div>
   <div class="wside"><div class="wp">Shenzhen Daily</div><div class="wacts"><a href="http://www.szdaily.com/content/2015-08/31/content_12185589.htm" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
 </div>
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-12 - Dama Drama - Why Do People Hate China&#39;s Dancing Grandmas.pdf" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener" aria-label="Read: Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?"></a>
+<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener" aria-label="Read: Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?"><img class="pdf" src="uploads/thumbs/2016-12 - Dama Drama - Why Do People Hate China&#39;s Dancing Grandmas.jpg" alt="" loading="lazy"></a>
   <div><div class="wk">City feature</div>
   <a class="wt" href="https://www.thatsmags.com/shenzhen/post/16628/why-do-people-hate-china-s-dancing-grandmas" target="_blank" rel="noopener">Dama Drama: Why Do People Hate China&#39;s Dancing Grandmas?</a>
   <div class="wd">The first generation of lonely mothers in China&#39;s history — and the neighbors at war with their loudspeakers.</div></div>
@@ -376,7 +379,7 @@ See all 50
   <div class="wd">A day in the shadow economy with one of Shenzhen&#39;s informal mobile traders.</div></div>
   <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/20994/a-peak-inside-the-world-of-street-side-phone-service" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a><a href="uploads/Street-Side Phone Seller.pdf" target="_blank" rel="noopener">Magazine PDF <span class="ar">↗</span></a></div></div>
 </div>
-<div class="w has-thumb"><a class="w-thumb" data-pdf-thumb="uploads/2016-10 - Gotta Smoke - What Your Cigs Say About You.pdf" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener" aria-label="Read: Gotta Smoke? What Your Cigs Say About You"></a>
+<div class="w has-thumb"><a class="w-thumb thumb-loaded" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener" aria-label="Read: Gotta Smoke? What Your Cigs Say About You"><img class="pdf" src="uploads/thumbs/2016-10 - Gotta Smoke - What Your Cigs Say About You.jpg" alt="" loading="lazy"></a>
   <div><div class="wk">Humor</div>
   <a class="wt" href="https://www.thatsmags.com/china/post/15672/what-your-cigs-say-about-you" target="_blank" rel="noopener">Gotta Smoke? What Your Cigs Say About You</a>
   <div class="wd">Five famous Chinese cigarette brands and what smoking them says about you.</div></div>
@@ -420,6 +423,5 @@ See all 50
     </footer>
   </main>
   <script src="assets/site.js" defer></script>
-  <script src="assets/pdf-thumbs.js" defer></script>
 </body>
 </html>

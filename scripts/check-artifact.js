@@ -25,7 +25,7 @@ FORBIDDEN.forEach((rel) => {
 });
 
 // Walk the artifact: only allow .js under assets/ that are known runtime scripts.
-const ALLOWED_JS = new Set(["assets/site.js", "assets/pdf-thumbs.js"]);
+const ALLOWED_JS = new Set(["assets/site.js"]);
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).forEach((d) => {
   const abs = path.join(dir, d.name);
   const rel = path.relative(OUT, abs);

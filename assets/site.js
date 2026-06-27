@@ -25,7 +25,7 @@
   }
 
   // ---------- lightbox (built from [data-lb] elements) ----------
-  var root, groups = {}, cur = [], idx = 0;
+  var root, groups = {}, cur = [], idx = 0, lastTrigger = null;
   function ensure() {
     if (root) return;
     var css = document.createElement("style");
@@ -47,6 +47,9 @@
     document.head.appendChild(css);
     root = document.createElement("div");
     root.className = "slb";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-label", "Image viewer");
     var mk = function (tag, cls, txt) { var n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
     var x = mk("button", "slb-x", "Close ✕"); x.setAttribute("aria-label", "Close");
     var count = mk("div", "slb-count");
@@ -62,9 +65,16 @@
     root.onclick = function (e) { if (e.target === root) close(); };
     document.addEventListener("keydown", function (e) {
       if (!root.classList.contains("on")) return;
-      if (e.key === "Escape") close();
-      else if (e.key === "ArrowLeft") go(-1);
-      else if (e.key === "ArrowRight") go(1);
+      if (e.key === "Escape") { close(); }
+      else if (e.key === "ArrowLeft") { go(-1); }
+      else if (e.key === "ArrowRight") { go(1); }
+      else if (e.key === "Tab") {
+        var f = [].slice.call(root.querySelectorAll("button")).filter(function (b) { return b.offsetParent !== null; });
+        if (!f.length) return;
+        var first = f[0], last = f[f.length - 1], a = document.activeElement;
+        if (e.shiftKey && (a === first || !root.contains(a))) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && (a === last || !root.contains(a))) { e.preventDefault(); first.focus(); }
+      }
     });
   }
   function render() {
@@ -84,10 +94,10 @@
   function go(d) { idx = (idx + d + cur.length) % cur.length; render(); }
   function open(group, i) {
     ensure(); cur = groups[group] || []; idx = i || 0; render();
-    requestAnimationFrame(function () { root.classList.add("on"); });
+    requestAnimationFrame(function () { root.classList.add("on"); var x = root.querySelector(".slb-x"); if (x) x.focus(); });
     document.documentElement.style.overflow = "hidden";
   }
-  function close() { root.classList.remove("on"); document.documentElement.style.overflow = ""; }
+  function close() { root.classList.remove("on"); document.documentElement.style.overflow = ""; if (lastTrigger) { lastTrigger.focus(); lastTrigger = null; } }
 
   function initLightbox() {
     groups = {};
@@ -98,7 +108,12 @@
                   cap: el.getAttribute("data-cap") || "", loc: el.getAttribute("data-loc") || "" });
       var gi = list.length - 1;
       el.style.cursor = "pointer";
-      el.addEventListener("click", function (e) { e.preventDefault(); open(g, gi); });
+      if (!el.hasAttribute("tabindex")) el.setAttribute("tabindex", "0");
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", "View larger: " + (el.getAttribute("data-cap") || el.getAttribute("alt") || "image"));
+      var openThis = function (e) { e.preventDefault(); lastTrigger = el; open(g, gi); };
+      el.addEventListener("click", openThis);
+      el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") openThis(e); });
     });
   }
 

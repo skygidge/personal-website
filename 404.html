@@ -12,10 +12,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root{ --bg:#121110; --ink:#ece7dc; --soft:#9a9286; --faint:#605850; --line-2:rgba(236,231,220,.07);
+  :root{ --bg:#121110; --ink:#ece7dc; --soft:#9a9286; --faint:#8c8275; --line-2:rgba(236,231,220,.07);
     --accent:#d4663a; --mono:"JetBrains Mono",ui-monospace,monospace; --serif:"Newsreader",Georgia,serif;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
   *{margin:0;padding:0;box-sizing:border-box}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100svh;display:flex;
     align-items:center;justify-content:center;text-align:center;padding:40px;-webkit-font-smoothing:antialiased}
   .wrap{max-width:36rem}

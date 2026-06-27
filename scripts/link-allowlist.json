@@ -1,0 +1,15 @@
+{
+  "_comment": "Hosts that block automated requests (WAF / anti-bot) but serve fine in a real browser. check-links.js reports URLs from these hosts as 'allowlisted' (verified by hand) rather than failures. Re-open them in a browser periodically to confirm they still resolve.",
+  "hosts": [
+    {
+      "host": "szdaily.sznews.com",
+      "reason": "Shenzhen Daily e-paper WAF returns 567 to non-browser clients; articles open normally in a browser. These are secondary 'view the original' links — primary links prefer the on-site clip pages.",
+      "lastVerified": "2026-06"
+    },
+    {
+      "host": "www.linkedin.com",
+      "reason": "LinkedIn returns 999 to non-browser clients; the profile is public and loads in a browser.",
+      "lastVerified": "2026-06"
+    }
+  ]
+}

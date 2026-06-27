@@ -22,6 +22,11 @@ const S = global.window.SKY;
 require(path.join(ROOT, "assets", "articles.js"));
 const ARTICLES = global.window.SKY_ARTICLES || [];
 
+// Hosts known to block bots but serve fine to humans — see scripts/link-allowlist.json.
+let ALLOW = { hosts: [] };
+try { ALLOW = require(path.join(__dirname, "link-allowlist.json")); } catch (e) { /* optional */ }
+const allowed = (url) => { try { const h = new URL(url).host; return ALLOW.hosts.some((x) => x.host === h); } catch (e) { return false; } };
+
 const UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " +
   "(KHTML, like Gecko) Chrome/124.0 Safari/537.36";
 const TIMEOUT = 15000;
@@ -84,16 +89,19 @@ async function run() {
       // codes (403/429/999, szdaily's WAF 567, other 5xx) are "verify by hand" —
       // the content usually exists; the host just refuses automated requests.
       const dead = r.status === 404 || r.status === 410;
-      const verify = !ok && !dead;
-      results.push({ url, ...r, ok, dead, verify });
-      console.log(`  [${ok ? "OK " : dead ? "DEAD" : "??? "}] ${r.status || r.note || "?"}  ${url}`);
+      const allow = !ok && !dead && allowed(url);
+      const verify = !ok && !dead && !allow;
+      results.push({ url, ...r, ok, dead, verify, allow });
+      console.log(`  [${ok ? "OK  " : dead ? "DEAD" : allow ? "ALLOW" : "??? "}] ${r.status || r.note || "?"}  ${url}`);
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   const dead = results.filter((r) => r.dead);
   const verify = results.filter((r) => r.verify);
-  console.log(`\n  ${results.length - dead.length - verify.length} ok · ${dead.length} dead · ${verify.length} to verify`);
+  const allow = results.filter((r) => r.allow);
+  const okCount = results.length - dead.length - verify.length - allow.length;
+  console.log(`\n  ${okCount} ok · ${dead.length} dead · ${verify.length} to verify · ${allow.length} allowlisted`);
   if (dead.length) {
     console.log(`\n  DEAD (${dead.length}) — 404/410, fix these:`);
     for (const r of dead) { console.log(`   ✗ ${r.status}  ${r.url}`); byUrl.get(r.url).forEach((w) => console.log(`       ${w}`)); }
@@ -102,7 +110,11 @@ async function run() {
     console.log(`\n  VERIFY BY HAND (${verify.length}) — bot-blocked/WAF/timeout, content likely fine (szdaily e-paper 567, LinkedIn 999, etc.):`);
     for (const r of verify) console.log(`   ? ${r.status || r.note || "no response"}  ${r.url}`);
   }
-  if (!dead.length && !verify.length) console.log("\n  PASS — every external link resolved.");
+  if (allow.length) {
+    console.log(`\n  ALLOWLISTED (${allow.length}) — hosts that block bots but were verified by hand (scripts/link-allowlist.json):`);
+    for (const r of allow) console.log(`   ✓ ${r.status || r.note}  ${r.url}`);
+  }
+  if (!dead.length && !verify.length) console.log(`\n  PASS — no dead links${allow.length ? ` (${allow.length} allowlisted)` : ""}.`);
   process.exit(dead.length ? 1 : 0);
 }
 run();

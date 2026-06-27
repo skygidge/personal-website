@@ -13,16 +13,16 @@ scripts/package.js    ← assembles _site/ — the deploy artifact, runtime file
 scripts/check-artifact.js ← guard: _site/ contains no build-input/source files
 scripts/optimize-images.js ← resizes/recompresses oversized JPEGs in uploads/ (sips)
 scripts/validate.js   ← checks refs, asset budget, metadata, internal links
+scripts/render-pdf-thumbs.js ← pre-renders page-1 PDF thumbnails to uploads/thumbs/ (sips)
 
 assets/site.js        ← shipped: reveal-on-scroll, header chrome, DOM-based lightbox
-assets/pdf-thumbs.js  ← shipped: renders page-1 PDF thumbnails (writing pages)
 
 index.html · writing.html · photography.html · shenzhen-daily.html · ai-tools.html
 404.html · robots.txt · sitemap.xml · og-image.jpg
-uploads/              ← images + article PDFs
+uploads/              ← images, article PDFs, and pre-rendered PDF thumbnails (thumbs/)
 ```
 
-The browser loads only `site.js` (+ `pdf-thumbs.js` on writing pages). There is **no** client-side data/templating layer and no browser-local editing tool — content changes go through `data.js` + a rebuild.
+The browser loads only `site.js`. There is **no** client-side data/templating layer and no browser-local editing tool — content changes go through `data.js` + a rebuild.
 
 ## Common tasks
 
@@ -33,6 +33,7 @@ npm test               # alias for validate
 npm run package        # assemble _site/ — the deploy artifact (runtime files only)
 npm run check-artifact # assert _site/ has no build-input/source files
 npm run optimize       # shrink any oversized JPEGs in uploads/ (macOS `sips`)
+npm run render-thumbs  # re-render page-1 PDF thumbnails after adding/replacing a PDF
 ```
 
 **To add a photo / article / AI project:** edit the relevant array in `assets/data.js`, then `npm run build` and `npm run validate`. Drop image files in `uploads/` (run `npm run optimize` for large ones). Captions and text are HTML-escaped at build time, so content is safe to treat as untrusted.
@@ -47,7 +48,7 @@ Display images are kept small (≤ ~700 KB; long edge 1800 px, hero 2200 px, JPE
 
 GitHub Pages, custom domain `skythomasgidge.com` (apex A-records to GitHub + `www` CNAME; `CNAME` file in repo; HTTPS enforced). `.nojekyll` is committed so assets with spaces / Unicode names serve correctly.
 
-**The repo root is not served.** Pages deploys an allowlisted artifact built by [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): `npm run package` copies only runtime files into `_site/` — the HTML pages, `404.html`, `robots.txt`, `sitemap.xml`, `og-image.jpg`, `CNAME`, `.nojekyll`, `uploads/`, and `assets/{site,pdf-thumbs}.js`. Build inputs and source — `assets/data.js`, `scripts/`, `package.json`, `README.md` — are **excluded from the artifact and never reach the browser**. `npm run check-artifact` enforces this, and `https://skythomasgidge.com/assets/data.js` returns 404.
+**The repo root is not served.** Pages deploys an allowlisted artifact built by [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml): `npm run package` copies only runtime files into `_site/` — the HTML pages, `404.html`, `robots.txt`, `sitemap.xml`, `og-image.jpg`, `CNAME`, `.nojekyll`, `uploads/`, and `assets/site.js`. Build inputs and source — `assets/data.js`, `scripts/`, `package.json`, `README.md` — are **excluded from the artifact and never reach the browser**. `npm run check-artifact` enforces this, and `https://skythomasgidge.com/assets/data.js` returns 404.
 
 ## CI
 

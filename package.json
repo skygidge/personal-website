@@ -10,7 +10,8 @@
     "optimize": "node scripts/optimize-images.js",
     "check-links": "node scripts/check-links.js",
     "validate": "node scripts/validate.js",
-    "test": "node scripts/validate.js"
+    "test": "node scripts/validate.js",
+    "render-thumbs": "node scripts/render-pdf-thumbs.js"
   },
   "license": "UNLICENSED"
 }
