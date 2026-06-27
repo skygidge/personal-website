@@ -55,3 +55,20 @@ GitHub Pages, custom domain `skythomasgidge.com` (apex A-records to GitHub + `ww
 [`.github/workflows/validate.yml`](.github/workflows/validate.yml) runs `npm test` on every push and pull request, and verifies the committed static HTML is up to date with `data.js`.
 
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) (push to `main`) validates, rebuilds, checks for build drift, packages the runtime artifact, asserts it carries no build-input/source files (`npm run check-artifact`), then publishes it to GitHub Pages.
+
+## Maintenance notes
+
+A few items are intentionally left for a manual decision:
+
+- **Git history size.** `.git` (~70 MB) carries ~26 MB of superseded image originals from before they were optimised (an 11 MB and an 8.5 MB Wix export, a 6 MB PNG, etc.) — history-only; the working tree already holds the small derivatives, all ≤ 1.8 MB. Optional cleanup — **rewrites history, needs a force-push, and any existing clone must be re-cloned afterward**:
+  ```bash
+  pipx install git-filter-repo
+  git filter-repo --strip-blobs-bigger-than 3M   # no current file exceeds 1.8 MB, so none are removed
+  git push --force-with-lease origin main
+  ```
+- **Repo metadata** (run when convenient; cosmetic, aids discovery):
+  ```bash
+  gh repo edit skygidge/personal-website --homepage https://skythomasgidge.com
+  gh repo edit skygidge/personal-website --add-topic photography,journalism,portfolio,static-site,github-pages
+  ```
+- **Master files.** `uploads/*.psd` are git-ignored (a ~42 MB hero PSD sits in the working tree) so they never get committed or deployed.
