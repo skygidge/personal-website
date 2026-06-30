@@ -398,6 +398,12 @@ window.SKY = (function () {
   const ethos = "Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — if the logic doesn't hold up in the material, the suggestion doesn't move forward.";
   const introLine = "I'm a video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.";
 
+  // Cloudflare Web Analytics. Paste the beacon token from the Cloudflare
+  // dashboard (Analytics & Logs → Web Analytics → your site → snippet's
+  // data-cf-beacon token). Leave "" to ship no tracking at all. Cookie-free,
+  // no consent banner needed; baked into every page at build time.
+  const analytics = { cfToken: "bf08b31e80bf416c8cb92ded355eeca9" };
+
   const identity = {
     name: "Sky Thomas Gidge",
     roles: ["Photographer", "Journalist", "AI practitioner"],
@@ -412,5 +418,5 @@ window.SKY = (function () {
     clients: ["Insta360", "DJI", "Whiskey Bottle Co."]
   };
 
-  return { photos, writing, award, ai, ethos, introLine, identity };
+  return { photos, writing, award, ai, ethos, introLine, identity, analytics };
 })();

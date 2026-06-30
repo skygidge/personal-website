@@ -49,6 +49,15 @@ const META = {
 };
 const OG_IMAGE = SITE + "/og-image.jpg";
 
+// Cloudflare Web Analytics beacon — emitted only when a token is configured in
+// data.js (analytics.cfToken). Cookie-free; defer keeps it off the critical path.
+function analyticsTag() {
+  const t = (S.analytics && S.analytics.cfToken || "").trim();
+  if (!t) return "";
+  return `<script defer src="https://static.cloudflareinsights.com/beacon.min.js" `
+    + `data-cf-beacon='{"token": "${attr(t)}"}'></script>`;
+}
+
 function headMeta(file) {
   const m = META[file];
   const canonical = SITE + m.path;
@@ -66,8 +75,9 @@ function headMeta(file) {
     `<meta name="twitter:title" content="${attr(m.title)}">`,
     `<meta name="twitter:description" content="${attr(m.desc)}">`,
     `<meta name="twitter:image" content="${url(OG_IMAGE)}">`,
-    `<noscript><style>.rv{opacity:1 !important;transform:none !important}</style></noscript>`
-  ].map(l => "  " + l).join("\n");
+    `<noscript><style>.rv{opacity:1 !important;transform:none !important}</style></noscript>`,
+    analyticsTag()
+  ].filter(Boolean).map(l => "  " + l).join("\n");
 }
 
 // ---- renderers (markup mirrors the former runtime templates) ----
@@ -269,7 +279,7 @@ function renderClip(a) {
   <meta name="twitter:title" content="${attr(title)}">
   <meta name="twitter:description" content="${attr(desc)}">
   <meta name="twitter:image" content="${url(OG_IMAGE)}">
-  ${clipJsonLd(a, row, title, desc)}
+  ${clipJsonLd(a, row, title, desc)}${analyticsTag() ? "\n  " + analyticsTag() : ""}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
