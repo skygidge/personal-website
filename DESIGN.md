@@ -63,9 +63,10 @@ button      .live (orange, pulsing dot) or a.go (bordered) — pinned to bottom
 
 ## Card media
 
-- Landscape media (`img` or `vid`): full card width via `.shot`.
-- Portrait media (9:16 screenshots): add `portrait: true` in data →
-  `.shot.portrait`, max-width 300px, centered.
+- **Uniform frame: every `.shot` is 2:3** (`aspect-ratio:2/3`), full card width,
+  media cover-fitted from the top (`object-fit:cover; object-position:center top`).
+  Modeled on the Edit Bay infographic (853×1280). Capture screenshots and record
+  videos at 854×1280 so nothing meaningful gets cropped.
 - Video: muted, autoplay, looped, playsinline, no controls. Record real product
   UI (Playwright), convert to h264 mp4, `-crf 26`, faststart. Keep under ~500KB.
 - Screenshots of live tools should show **real results** (e.g. the Insta360
@@ -134,5 +135,7 @@ These are content rules with the force of design rules:
 - **2026-07** — **ai-tools.html retired**: now a noindex meta-refresh stub
   redirecting to `/#ai`. Kept in the deploy package so the old URL resolves;
   dropped from META, sitemap, and validation. All nav points at `/#ai`.
-- **2026-07** — Card media policy set: landscape full-width, portrait 300px
-  centered, product UIs may be looping videos.
+- **2026-07** — Card media policy set: every card `.shot` is a uniform 2:3
+  frame (Edit Bay is the model); product UIs may be looping videos.
+- **2026-07** — `card-arranger.html` added: local-only drag-and-drop tool for
+  reordering the AI cards (not deployed, not in the sitemap).
