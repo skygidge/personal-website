@@ -365,34 +365,78 @@ window.SKY = (function () {
   const award = { kicker: "Award", pub: "Shenzhen Press Group · 深圳报业集团", t: "Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily" };
 
   const ai = [
-    { t: "Insta360 Creator Story Finder", status: "Live · Weekly", live: "https://skygidge.github.io/insta360-finder", cadence: true,
-      d: "An autonomous weekly agent that finds undiscovered Insta360 creators before they go mainstream. Verified sources, checked against an exclusion list, published to a live page. No manual intervention.",
-      tags: ["Autonomous", "Verified · checked"], metric: "RUNS EVERY SUNDAY" },
-    { t: "Sky's Pre-Post", status: "Live · Proof of concept", live: "https://skysprepost.app",
-      d: "Built for the team managing influencer partnerships: it reviews creator videos faster, checks they meet FTC disclosure rules when the creator is paid, confirms the brand logo appears, and measures the video's tone. A proof of concept — and it worked.",
-      tags: ["Compliance check", "Tone analysis"], metric: "FASTER VETTING" },
-    { t: "AI Product Photography", status: "Experiment", span2: true,
-      d: "As AI image models have improved, product photography has gotten dramatically easier. I built a makeshift studio in our office, shot every side of each camera, laid the angles out on one sheet, and fed that to the model alongside commercials whose look I wanted to borrow. For a 360 camera we're not quite there yet — but we're very, very close.",
-      tags: ["Reference-driven", "Multi-angle input"], metric: "EVERY SIDE → ONE SHEET",
-      gallery: [U + "x4-air-all-sides.jpg", U + "Gemini_Generated_Image_wdj12wwdj12wwdj1.jpg", U + "Gemini_Generated_Image_jqc9c8jqc9c8jqc9.jpg", U + "Gemini_Generated_Image_o6siifo6siifo6si.jpg", U + "Gemini_Generated_Image_vs96pfvs96pfvs96.jpg", U + "Gemini_Generated_Image_o620ppo620ppo620.jpg", U + "x4-air-fire-ice.jpg", U + "go-ultra-hands.jpg", U + "go-ultra-glow.jpg"] },
-    { t: "Video Selects: Claude in the Edit Bay", status: "Cinegear", link: "https://thepromptresponse.substack.com/p/no-6-june-4-2026", linkText: "Read the write-up ↗",
+    { t: "Video Selects: Claude in the Edit Bay", status: "Editing timesaver", link: "https://thepromptresponse.substack.com/p/no-6-june-4-2026", linkText: "Read the write-up ↗",
       img: U + "ai-edit-bay-workflow.jpg",
       d: "Claude reviewed transcripts and shot logs to pull selects from raw footage — reducing a full day of manual logging to about an hour. The edit was assembled in Premiere and screened at Cinegear.",
       tags: ["Workflow", "Checked vs. source"], metric: "8 HRS → 1 HR" },
     { t: "Prompt Response AI速写", status: "Active · 5+ issues", link: "https://thepromptresponse.substack.com", linkText: "Read on Substack ↗",
       img: U + "ai-newsletter-substack.jpg",
       d: "A bilingual AI newsletter for Insta360's Shenzhen creative studio. I build each issue after work — testing prompts, seeing what actually holds up for me, and working out how the studio could use it. It's real time: at least a full workday's worth of effort spread across a week per issue.",
-      tags: ["Bilingual", "Built after hours"], metric: "~8 HRS / ISSUE" },
-    { t: "Prompt Response Story Finder", status: "Live · Autonomous", live: "https://skygidge.github.io/prompt-response-finder/",
-      d: "Scans incoming newsletters, scores stories, writes bilingual EN/中文 summaries of the best ones, and pushes results to GitHub. It doesn't replace sourcing — it surfaces maybe half my leads, and I still dig out the rest myself — but it's a real head start.",
-      tags: ["Scoring", "GitHub push"], metric: "~HALF MY LEADS" },
-    { t: "Shenzhen True-Crime EPUB Generator", status: "Pipeline",
-      d: "Turns Chinese-language long-reads into bilingual Kindle EPUBs — fetched, translated with full cultural context, sources kept, assembled side-by-side. Built so a backlog of Shenzhen crime, history, and urban-village journalism is finally readable in English.",
-      tags: ["Translate w/ context", "EPUB → Kindle"], metric: "中文 → BILINGUAL" },
+      tags: ["Bilingual", "Built after hours"], metric: "COWORKERS SAVE TIME WITH AI" },
+    { t: "AI Product Photography", status: "Experiment", span2: true,
+      d: "As AI image models have improved, product photography has gotten dramatically easier. I built a makeshift studio in our office, shot every side of each camera, laid the angles out on one sheet, and fed that to the model alongside commercials whose look I wanted to borrow. For a 360 camera we're not quite there yet — but we're very, very close.",
+      tags: ["Reference-driven", "Multi-angle input"], metric: "(ALMOST) UBER-LOW-COST PRODUCT PHOTOS",
+      gallery: [U + "x4-air-all-sides.jpg", U + "Gemini_Generated_Image_wdj12wwdj12wwdj1.jpg", U + "Gemini_Generated_Image_jqc9c8jqc9c8jqc9.jpg", U + "Gemini_Generated_Image_o6siifo6siifo6si.jpg", U + "Gemini_Generated_Image_vs96pfvs96pfvs96.jpg", U + "Gemini_Generated_Image_o620ppo620ppo620.jpg", U + "x4-air-fire-ice.jpg", U + "go-ultra-hands.jpg", U + "go-ultra-glow.jpg"] },
+    { t: "Sky's Pre-Post", status: "Live · Proof of concept", live: "https://skysprepost.app",
+      vid: U + "skys-prepost-hero.mp4",
+      d: "Built for the team managing influencer partnerships: it reviews creator videos faster, checks they meet FTC disclosure rules when the creator is paid, confirms the brand logo appears, and measures the video's tone. A proof of concept — and it worked.",
+      tags: ["Compliance check", "Tone analysis"], metric: "FASTER VETTING" },
     { t: "Sales Analysis: David", status: "Case study",
-      d: "One of our best salesmen, David, was mic'd during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. And accurately. Claude turned what David did and said on the floor into a data-driven snapshot of his performance. The sales count came out correct and David found the results insightful. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.",
-      tags: ["Transcribed footage", "Human-checked"], metric: "TRANSCRIPT → SCORECARD",
-      gallery: [U + "sales-analysis-david.jpg"] }
+      d: "One of our best salesmen, David, was mic'd during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. And accurately. Claude turned what David did and said on the floor into a data-driven snapshot of his performance. The sales count came out correct, David found the results insightful — and he agreed with Claude's suggestion to frame the product around what it does for the customer. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.",
+      tags: ["Transcribed footage", "Human-checked"], metric: "SALES INSIGHT",
+      img: U + "sales-analysis-david.jpg" },
+    { t: "Prompt Response Story Finder", status: "Live · Autonomous", live: "https://skygidge.github.io/prompt-response-finder/",
+      d: "Scans incoming newsletters, scores stories, writes bilingual EN/中文 summaries of the best ones, and pushes results to GitHub. It doesn't replace sourcing — it surfaces maybe half my leads, and I still dig out the rest myself — but it's a real head start. I've also fed it my writing and asked for first-draft blurbs. So far it can't match my wit or metaphor. The machines haven't won — yet.",
+      img: U + "prompt-response-finder.jpg",
+      tags: ["Scoring", "GitHub push"], metric: "~HALF MY LEADS" },
+    { t: "Insta360 Creator Story Finder", status: "Live · Weekly", live: "https://skygidge.github.io/insta360-finder", cadence: true,
+      img: U + "insta360-finder-week.jpg",
+      d: "An autonomous weekly agent that finds undiscovered Insta360 creators before they go mainstream. Verified sources, checked against an exclusion list, published to a live page. No manual intervention.",
+      tags: ["Autonomous", "Verified · checked"], metric: "RUNS EVERY SUNDAY" },
+    // Full-width feature — rendered by toolsEpubCard() in build.js (render:"epub").
+    // Kept LAST so the two span2 cards each fill a clean row (see design_handoff_epub_section/README.md).
+    {
+      render: "epub",
+      span2: true,
+      t: "Shenzhen True-Crime EPUB Generator",
+      status: "Pipeline · 21+ creative nonfiction articles",
+      metric: "TALES FROM THE FRONTIER YEARS",
+      // d: plain-text fallback for the homepage AI grid (which renders a normal card).
+      d: "Turns Chinese-language long-reads into bilingual, Kindle-ready EPUBs — translated with an eye to tone, agent-reviewed paragraph by paragraph, and packaged side by side with maps and sourced photos.",
+      source: "<b>Starts with Chinese-language reporting</b> — news write-ups and long-form web articles on old Shenzhen cases, most with no English version anywhere.",
+      steps: [
+        { k: "Source",     d: "Begin with a <b>Chinese-language article</b> — a news report or long-form web piece on a Shenzhen case. Many are semi-lost, recovered from cached pages." },
+        { k: "Translate",  d: "Claude renders the Chinese into English with an eye to <b>tone</b>, not just literal words." },
+        { k: "Review",     d: "A separate agent checks it <b>paragraph by paragraph</b> and rejects any translation that isn't up to snuff." },
+        { k: "Illustrate", d: "Relevant photos pulled from Wikimedia Commons; each book gets <b>maps of streets I know well</b>." },
+        { k: "Assemble",   d: "English and 中文 laid side by side, packaged as an EPUB and sent to the Kindle." }
+      ],
+      note: "After a few solid weeks of stories, the repeatable parts became a Python script.",
+      tags: ["Chinese → English", "Agent-reviewed", "EPUB → Kindle"],
+      excerpt: {
+        chap: "One · 失踪事件",
+        title: "The Disappearances",
+        en: "Over the preceding months, the two of them had killed twelve young women between them — and cut the faces off their bodies. When the judgment was announced, some in the gallery cheered, some shouted curses, others wept in shock. The two killers sat the whole time with no expression on their faces. Their indifference was bone-chilling.",
+        zh: "过去的数月间，他们共杀死了12名少女，还割去了她们的脸皮！判决宣布后，旁听席上有人在叫好，有人在斥骂，还有人激动地落了泪。可被判死刑的两名凶手，一直面无表情。他们的冷漠令人胆寒。",
+        src: "译自 zhihu.com · news.qq.com（原文已被屏蔽，据存档恢复）",
+        img: U + "epub-excerpt-illustrative.jpg",
+        cap: "Mass trial · Six Demoness case",
+        foot: "马勇案",
+        pct: "9%"
+      },
+      books: [
+        { no: "03", nm: "The Ma Yong Serial Murders", zh: "马勇案", file: "03-mayong-buji-bilingual.epub", size: "1.9 MB",
+          hook: "A mismatched couple, a fake job agency, twelve young women dead — the case English coverage called China's Jack the Ripper." },
+        { no: "04", nm: "The Six Demonesses", zh: "六魔女", file: "04-six-demoness-bilingual.epub", size: "3.8 MB",
+          hook: "Beauty as bait — six young women lured drivers off the airport highway, and the killings gripped the whole country." },
+        { no: "07", nm: "Gangxia First Blood", zh: "第一血案", file: "07-gangxia-firstblood-bilingual.epub", size: "641 KB",
+          hook: "Four dead in a rented Gangxia flat, one stabbed thirty-six times — the bloodiest case a Shenzhen prosecutor ever opened, unsolved for a decade." },
+        { no: "16", nm: "The Sanhe Gods", zh: "三和大神", file: "16-sanhe-gods-bilingual.epub", size: "689 KB",
+          hook: "Work one day, drift for three — the day-laborers of the Sanhe market who dropped out of the race." },
+        { no: "60", nm: "Sixty Days & Nights", zh: "二奶村", file: "60-days-bilingual.epub", size: "2.6 MB",
+          hook: "A reporter's sixty days undercover in Shenzhen's 'mistress village,' in the shadow of the Hong Kong border." }
+      ]
+    }
   ];
 
   const ethos = "Claude is a collaborator, not the last word. Every assumption gets traced back to the source before it's actioned — if the logic doesn't hold up in the material, the suggestion doesn't move forward.";

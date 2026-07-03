@@ -29,6 +29,9 @@ const esc = (s) => String(s == null ? "" : s)
   .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 // attribute value; also neutralise javascript: in url-ish attrs
 const attr = (s) => esc(s);
+// escape everything, then re-enable the single authored <b> tag used in a few
+// long-form data fields (source/step copy). No other markup survives.
+const richB = (s) => esc(s).replace(/&lt;b&gt;/g, "<b>").replace(/&lt;\/b&gt;/g, "</b>");
 const url = (s) => {
   const v = String(s == null ? "" : s).trim();
   return /^\s*javascript:/i.test(v) ? "#" : esc(v);
@@ -43,9 +46,10 @@ const META = {
   "photography.html": { path: "/photography.html", title: "Photography — Sky Thomas Gidge",
     desc: "Night photography and street work by Sky Thomas Gidge, shot mostly in Shenzhen with some Los Angeles." },
   "shenzhen-daily.html": { path: "/shenzhen-daily.html", title: "Shenzhen Daily Archive — Sky Thomas Gidge",
-    desc: "Sky Thomas Gidge's Shenzhen Daily byline archive — staff reporting from Shenzhen, 2015–2016: breaking news, business and expat-life features." },
-  "ai-tools.html": { path: "/ai-tools.html", title: "AI Tools — Sky Thomas Gidge",
-    desc: "AI tools and experiments by Sky Thomas Gidge — autonomous agents, a bilingual newsletter, and Claude-assisted video and writing workflows." }
+    desc: "Sky Thomas Gidge's Shenzhen Daily byline archive — staff reporting from Shenzhen, 2015–2016: breaking news, business and expat-life features." }
+  // ai-tools.html retired June 2026: now a static noindex redirect stub to /#ai
+  // (kept out of META so it's skipped by the build and dropped from the sitemap,
+  // but still shipped by package.js so the old URL keeps resolving).
 };
 const OG_IMAGE = SITE + "/og-image.jpg";
 
@@ -156,7 +160,11 @@ function aiButton(p, liveLabel) {
   if (p.link) return `<a class="go" href="${url(p.link)}" target="_blank" rel="noopener">${esc(p.linkText || "Read it")}</a>`;
   return "";
 }
-const aiShot = (p) => p.img ? `<div class="shot"><img src="${url(p.img)}" alt="${attr(p.t)}" loading="lazy"></div>` : "";
+const aiShot = (p) => {
+  if (p.vid) return `<div class="shot"><video src="${url(p.vid)}" autoplay muted loop playsinline aria-label="${attr(p.t)}"></video></div>`;
+  if (p.img) return `<div class="shot"><img src="${url(p.img)}" alt="${attr(p.t)}" loading="lazy"></div>`;
+  return "";
+};
 const aiGallery = (p, grp) => p.gallery
   ? `<div class="gallery">${p.gallery.map(g => `<img src="${url(g)}" alt="" loading="lazy" data-lb="${grp}" data-full="${url(g)}">`).join("")}</div>`
   : "";
@@ -179,6 +187,52 @@ function toolsAiCard(p, i) {
   <p>${esc(p.d)}</p>
   ${aiShot(p)}${aiGallery(p, "ai-tools-" + i)}
   <div class="foot"><div class="tags">${p.tags.map(t => `<span>${esc(t)}</span>`).join("")}</div>${aiButton(p, "It's live ↗")}</div></div>`;
+}
+// ai-tools page: full-width EPUB feature (.epub-feature). Ported from the
+// design_handoff_epub_section bundle into the build-time render path.
+function toolsEpubCard(p) {
+  const ex = p.excerpt || {};
+  const steps = (p.steps || []).map((s, i) =>
+    `<div class="step"><div class="num">${String(i + 1).padStart(2, "0")}</div>`
+    + `<div><div class="sk">${esc(s.k)}</div><div class="sd">${richB(s.d)}</div></div></div>`).join("");
+  const books = (p.books || []).map((b) =>
+    `<div class="dl"><span class="idx">${esc(b.no)}</span>`
+    + `<div><span class="nm">${esc(b.nm)}</span><span class="zh">${esc(b.zh)}</span>`
+    + (b.hook ? `<div class="hook">${esc(b.hook)}</div>` : "")
+    + `<div class="meta">EPUB${b.size ? " · " + esc(b.size) : ""}</div></div>`
+    + `<a class="dbtn" href="${url("uploads/" + b.file)}" download>Download <span class="ar">↓</span></a></div>`).join("");
+  const en = String(ex.en || "");
+  const eink =
+    `<div class="eink">`
+    + `<span class="kmark">Kindle</span>`
+    + `<span class="aa"><span class="s">A</span><span class="l">A</span></span>`
+    + `<div class="eink-pad">`
+    +   `<div class="chap">${esc(ex.chap)}</div>`
+    +   `<div class="csec">${esc(ex.title)}</div>`
+    +   `<div class="en"><span class="drop">${esc(en.charAt(0))}</span>${esc(en.slice(1))}</div>`
+    +   `<div class="zh">${esc(ex.zh)}</div>`
+    +   `<div class="srcnote">${esc(ex.src)}</div>`
+    +   `<div class="plate"><span class="cap">${esc(ex.cap)}</span><img src="${url(ex.img)}" alt=""></div>`
+    + `</div>`
+    + `<div class="foot"><span>${esc(ex.foot)}</span><span class="prog"></span><span>${esc(ex.pct)}</span></div>`
+    + `</div>`;
+  return `<div class="epub-feature rv">
+  <div class="aic-top"><span class="st">${esc(p.status)}</span><span class="mt">${esc(p.metric)}</span></div>
+  <h3>${esc(p.t)}</h3>
+  ${p.sub ? `<div class="sub">${esc(p.sub)}</div>` : ""}
+  ${p.source ? `<div class="srcline"><span class="zh">中文长文</span><span class="ar">→</span><span class="txt">${richB(p.source)}</span></div>` : ""}
+  <div class="layA">
+    <div>
+      <div class="flow">${steps}</div>
+      ${p.note ? `<div class="flow-note">${esc(p.note)}</div>` : ""}
+      <div class="tags">${(p.tags || []).map(t => `<span>${esc(t)}</span>`).join("")}</div>
+    </div>
+    ${eink}
+  </div>
+  <div class="dlwrap">
+    <div class="dl-h"><span class="t">Read them now</span><span class="c">Free · EPUB · Kindle-ready</span></div>
+    <div class="dlist">${books}</div>
+  </div></div>`;
 }
 function archiveRow(w) {
   const year = (w.date || "").slice(0, 4) || "Undated";
@@ -398,7 +452,7 @@ function sections(file) {
       moreLabel: "See all " + S.photos.length,
       award: `<span class="dot"></span><div><div class="k">${esc(S.award.kicker)} · ${esc(S.award.pub)}</div><div class="t">${esc(S.award.t)}</div></div>`,
       wlist: home.map(homeWritingRow).join("\n") + (wfoot ? "\n" + wfoot : ""),
-      aigrid: S.ai.map(homeAiCard).join("\n"),
+      aigrid: S.ai.map((p, i) => p.render === "epub" ? toolsEpubCard(p) : homeAiCard(p, i)).join("\n"),
       social: socialLinks()
     };
   }
@@ -413,7 +467,6 @@ function sections(file) {
     wlist: groupedWriting(fullWritingRow),
     social: socialLinks()
   };
-  if (file === "ai-tools.html") return { mgrid: S.ai.map(toolsAiCard).join("\n"), social: socialLinks() };
   if (file === "shenzhen-daily.html") {
     const sd = S.writing.filter(w => w.source === "sd").sort((a, b) => (a.date || "").localeCompare(b.date || ""));
     let out = "", last = null;

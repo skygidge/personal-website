@@ -7,7 +7,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
-const PAGES = ["index.html", "writing.html", "photography.html", "shenzhen-daily.html", "ai-tools.html"];
+const PAGES = ["index.html", "writing.html", "photography.html", "shenzhen-daily.html"];
 // generated full-text article pages live in clips/
 const CLIPS = fs.existsSync(path.join(ROOT, "clips"))
   ? fs.readdirSync(path.join(ROOT, "clips")).filter((f) => f.endsWith(".html")).map((f) => "clips/" + f)
