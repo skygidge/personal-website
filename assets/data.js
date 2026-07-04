@@ -139,7 +139,7 @@ window.SKY = (function () {
       site: "http://www.szdaily.com/content/2015-08/21/content_12124850.htm",
       date: "2015-08-21" },
     { group: "News reporting", source: "sd",
-      t: "The Other Job Requirement: Be White", kicker: "Investigation", pub: "Shenzhen Daily", home: true, homeOrder: 4,
+      t: "The Other Job Requirement: Be White", kicker: "Investigation", pub: "Shenzhen Daily",
       d: "Racial discrimination in China's English teaching industry — where being a native speaker matters less than looking the part.",
       site: "http://www.szdaily.com/content/2015-08/31/content_12185589.htm",
       date: "2015-08-31" },
