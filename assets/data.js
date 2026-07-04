@@ -323,6 +323,7 @@ window.SKY = (function () {
       pdf: P + "2017-11 - Convenience Store Cocktails.pdf" },
     { group: "The funny ones",
       t: "Bang for Your Buck: Cheap Dates", kicker: "Humor", pub: "That's Magazines", home: true, homeOrder: 8,
+      img: P + "bang-for-your-buck-cheap-dates.gif",
       d: "Romance on a budget in the world's hardware capital.",
       note: "One of the most-read things I wrote. Also the most fun to write — the two are probably related.",
       site: TM + "china/post/14723/bang-for-your-buck-cheap-dates" },
