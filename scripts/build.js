@@ -40,7 +40,7 @@ const url = (s) => {
 // ---- per-page SEO config ----
 const META = {
   "index.html": { path: "/", title: "Sky Thomas Gidge — Video Editor, Journalist & AI Toolmaker",
-    desc: "Sky Thomas Gidge is a video editor and journalist between Shenzhen and Los Angeles who also builds useful AI tools — a pre-publish compliance checker, autonomous story finders, a bilingual newsletter about Claude. Night photography and investigative writing." },
+    desc: "Sky Thomas Gidge is a video editor and journalist between Shenzhen and Los Angeles who also builds useful AI tools — a pre-publish compliance checker, autonomous story finders, a bilingual AI newsletter for creative teams. Night photography and investigative writing." },
   "writing.html": { path: "/writing.html", title: "Writing — Sky Thomas Gidge",
     desc: "Journalism by Sky Thomas Gidge — features, investigations, breaking news and street portraits from Shenzhen, published in Shenzhen Daily and That's Magazines, 2015–2018." },
   "photography.html": { path: "/photography.html", title: "Photography — Sky Thomas Gidge",
