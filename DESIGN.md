@@ -139,3 +139,11 @@ These are content rules with the force of design rules:
   frame (Edit Bay is the model); product UIs may be looping videos.
 - **2026-07** — `card-arranger.html` added: local-only drag-and-drop tool for
   reordering the AI cards (not deployed, not in the sitemap).
+- **2026-07** — SEO pass: Person + WebSite JSON-LD on the homepage (built from
+  `identity` in data.js — disambiguates from the Swedish duo "Gidge"); GitHub
+  and Substack added to footer profiles and schema `sameAs`; tab/og title is
+  now "AI Creative Technologist" (visible page copy unchanged); hero preload.
+- **2026-07** — **Image filename rule**: uploads get descriptive, caption-based
+  kebab-case names (`ping-an-blue-futian.jpg`), never exporter junk
+  (`wix_*`, `*.publer.com`, Instagram numerics, `Gemini_Generated_*`).
+  46 files renamed; name new uploads this way from the start.
