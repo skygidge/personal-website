@@ -6,7 +6,7 @@ window.SKY = (function () {
   const U = "uploads/";
   const photos = [
     /* High-res selects from skythomasgidge.com/photography (1400px+) */
-    { src: U + "wix_a7aba162.jpg", cap: "Shopkeeper", loc: "Street", o: "l", sel: true, home: true, homeOrder: 1 },
+    { src: U + "wix_a7aba162.jpg", cap: "This is Mine", loc: "Street shop", o: "l", sel: true, home: true, homeOrder: 1 },
     { src: U + "wix_5b1c2e3d.jpg", cap: "Rooftop, last light", loc: "Shenzhen", o: "p", hero: true, sel: true },
     { src: U + "wix_2ca1bc56.jpg", cap: "Underpass sun", loc: "Portrait", o: "p", sel: true },
     { src: U + "wix_96d96f50.jpg", cap: "Ping An, blue", loc: "Futian", o: "p", sel: true, home: true, homeOrder: 2 },
@@ -363,6 +363,7 @@ window.SKY = (function () {
   ];
 
   const award = { kicker: "Award", pub: "Shenzhen Press Group · 深圳报业集团", t: "Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily" };
+  const photoAward = { kicker: "Finalist Award", pub: "EyeShenzhen.com", t: "This is Mine — selected for street photography" };
 
   const ai = [
     { t: "Video Selects: Claude in the Edit Bay", status: "Editing timesaver", link: "https://thepromptresponse.substack.com/p/no-6-june-4-2026", linkText: "Read the write-up ↗",
@@ -462,5 +463,5 @@ window.SKY = (function () {
     clients: ["Insta360", "DJI", "Whiskey Bottle Co."]
   };
 
-  return { photos, writing, award, ai, ethos, introLine, identity, analytics };
+  return { photos, writing, award, photoAward, ai, ethos, introLine, identity, analytics };
 })();

@@ -436,6 +436,8 @@ function groupedWriting(rowFn) {
   });
   return out;
 }
+const awardCard = (a) =>
+  `<span class="dot"></span><div><div class="k">${esc(a.kicker)} · ${esc(a.pub)}</div><div class="t">${esc(a.t)}</div></div>`;
 function sections(file) {
   if (file === "index.html") {
     const intro = esc(S.introLine).replace("usually do.", `<span class='q'>usually do.</span>`);
@@ -450,7 +452,8 @@ function sections(file) {
       pgCount: esc(S.photos.length + " frames · night · Shenzhen / LA"),
       pg: photoGrid((homePhotos.length ? homePhotos : S.photos.slice(0, 6)), false),
       moreLabel: "See all " + S.photos.length,
-      award: `<span class="dot"></span><div><div class="k">${esc(S.award.kicker)} · ${esc(S.award.pub)}</div><div class="t">${esc(S.award.t)}</div></div>`,
+      photoAward: awardCard(S.photoAward),
+      award: awardCard(S.award),
       wlist: home.map(homeWritingRow).join("\n") + (wfoot ? "\n" + wfoot : ""),
       aigrid: S.ai.map((p, i) => p.render === "epub" ? toolsEpubCard(p) : homeAiCard(p, i)).join("\n"),
       social: socialLinks()
@@ -458,12 +461,13 @@ function sections(file) {
   }
   if (file === "photography.html") return {
     count: esc(S.photos.length + " frames · night · Shenzhen / LA"),
+    photoAward: awardCard(S.photoAward),
     pg: photoGrid(S.photos, true),
     social: socialLinks()
   };
   if (file === "writing.html") return {
     articleCount: `${S.writing.length} articles`,
-    award: `<span class="dot"></span><div><div class="k">${esc(S.award.kicker)} · ${esc(S.award.pub)}</div><div class="t">${esc(S.award.t)}</div></div>`,
+    award: awardCard(S.award),
     wlist: groupedWriting(fullWritingRow),
     social: socialLinks()
   };

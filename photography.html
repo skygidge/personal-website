@@ -61,6 +61,14 @@
   .page-header .sub{font-size:15.5px;line-height:1.6;color:var(--soft);margin-top:16px;max-width:56ch}
   .page-header .meta{display:flex;gap:28px;margin-top:22px}
 
+  .award{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line-2);
+    padding:18px 22px}
+  .award .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+  .award .k{font-family:var(--mono);font-size:10px;line-height:1.2;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+  .award .t{font-family:var(--serif);font-style:italic;color:var(--soft);font-size:16px;line-height:1.18;margin-top:7px}
+  .photo-award{padding:14px 18px;margin-top:34px}
+  .photo-award + .pg{padding-top:18px}
+
   .pg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:40px 0 0;grid-auto-flow:dense}
   .cell{position:relative;aspect-ratio:3/4;overflow:hidden;background:#0a0908;cursor:pointer}
   .cell.land{grid-column:span 2;aspect-ratio:3/2}
@@ -117,8 +125,11 @@
 50 frames · night · Shenzhen / LA
 <!--/BUILD:count--></span></div>
       </div>
+      <div class="award photo-award" id="photoAward"><!--BUILD:photoAward-->
+<span class="dot"></span><div><div class="k">Finalist Award · EyeShenzhen.com</div><div class="t">This is Mine — selected for street photography</div></div>
+<!--/BUILD:photoAward--></div>
       <div class="pg" id="pg"><!--BUILD:pg-->
-<div class="cell land" data-lb="photos" data-full="uploads/wix_a7aba162.jpg" data-cap="Shopkeeper" data-loc="Street"><img src="uploads/wix_a7aba162.jpg" alt="Shopkeeper" loading="lazy"><div class="ov"></div><span class="n">01</span><span class="cp">Shopkeeper · Street</span></div>
+<div class="cell land" data-lb="photos" data-full="uploads/wix_a7aba162.jpg" data-cap="This is Mine" data-loc="Street shop"><img src="uploads/wix_a7aba162.jpg" alt="This is Mine" loading="lazy"><div class="ov"></div><span class="n">01</span><span class="cp">This is Mine · Street shop</span></div>
 <div class="cell" data-lb="photos" data-full="uploads/wix_5b1c2e3d.jpg" data-cap="Rooftop, last light" data-loc="Shenzhen"><img src="uploads/wix_5b1c2e3d.jpg" alt="Rooftop, last light" loading="lazy"><div class="ov"></div><span class="n">02</span><span class="cp">Rooftop, last light · Shenzhen</span></div>
 <div class="cell" data-lb="photos" data-full="uploads/wix_2ca1bc56.jpg" data-cap="Underpass sun" data-loc="Portrait"><img src="uploads/wix_2ca1bc56.jpg" alt="Underpass sun" loading="lazy"><div class="ov"></div><span class="n">03</span><span class="cp">Underpass sun · Portrait</span></div>
 <div class="cell" data-lb="photos" data-full="uploads/wix_96d96f50.jpg" data-cap="Ping An, blue" data-loc="Futian"><img src="uploads/wix_96d96f50.jpg" alt="Ping An, blue" loading="lazy"><div class="ov"></div><span class="n">04</span><span class="cp">Ping An, blue · Futian</span></div>
