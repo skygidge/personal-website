@@ -39,7 +39,7 @@ const url = (s) => {
 
 // ---- per-page SEO config ----
 const META = {
-  "index.html": { path: "/", title: "Sky Thomas Gidge — video editor, photographer, journalist",
+  "index.html": { path: "/", title: "Sky Thomas Gidge — AI Creative Technologist",
     desc: "Sky Thomas Gidge — video editor, photographer and journalist between Shenzhen and Los Angeles. Night photography, investigative writing, and a kit of small AI tools." },
   "writing.html": { path: "/writing.html", title: "Writing — Sky Thomas Gidge",
     desc: "Journalism by Sky Thomas Gidge — features, investigations, breaking news and street portraits from Shenzhen, published in Shenzhen Daily and That's Magazines, 2015–2018." },
@@ -62,6 +62,29 @@ function analyticsTag() {
     + `data-cf-beacon='{"token": "${attr(t)}"}'></script>`;
 }
 
+// Person + WebSite structured data (homepage only), assembled from existing
+// identity fields in data.js — no new prose. "Gidge" is also a Swedish
+// electronic duo with a Knowledge Graph entity; this markup tells Google which
+// Sky Thomas Gidge this site is.
+function siteJsonLd() {
+  const id = S.identity;
+  const ld = {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Person", "@id": SITE + "/#person",
+        name: id.name, url: SITE + "/", image: OG_IMAGE,
+        jobTitle: "AI Creative Technologist",
+        description: id.bio,
+        email: "mailto:" + id.email,
+        sameAs: socialUrls() },
+      { "@type": "WebSite", "@id": SITE + "/#website",
+        url: SITE + "/", name: id.name,
+        publisher: { "@id": SITE + "/#person" } }
+    ]
+  };
+  return `<script type="application/ld+json">${J(JSON.stringify(ld))}</script>`;
+}
+
 function headMeta(file) {
   const m = META[file];
   const canonical = SITE + m.path;
@@ -80,6 +103,7 @@ function headMeta(file) {
     `<meta name="twitter:description" content="${attr(m.desc)}">`,
     `<meta name="twitter:image" content="${url(OG_IMAGE)}">`,
     `<noscript><style>.rv{opacity:1 !important;transform:none !important}</style></noscript>`,
+    file === "index.html" ? siteJsonLd() : "",
     analyticsTag()
   ].filter(Boolean).map(l => "  " + l).join("\n");
 }
@@ -260,7 +284,7 @@ function archiveRow(w) {
 }
 
 // ---- contact + socials (shared by clip pages and the SD index) ----
-const SOCIAL_DEFS = [["LinkedIn", "linkedin"], ["Instagram", "instagram"], ["Twitter / X", "twitter"]];
+const SOCIAL_DEFS = [["LinkedIn", "linkedin"], ["GitHub", "github"], ["Substack", "substack"], ["Instagram", "instagram"], ["Twitter / X", "twitter"]];
 function socialUrls() {
   const s = S.identity.social || {};
   return SOCIAL_DEFS.map(([, k]) => s[k]).filter(Boolean);
