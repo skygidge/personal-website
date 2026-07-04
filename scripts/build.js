@@ -39,8 +39,8 @@ const url = (s) => {
 
 // ---- per-page SEO config ----
 const META = {
-  "index.html": { path: "/", title: "Sky Thomas Gidge — AI Creative Technologist",
-    desc: "Sky Thomas Gidge builds useful creative tools with AI — a pre-publish compliance checker, autonomous story finders, a bilingual newsletter about Claude. Also night photography and investigative writing, between Shenzhen and Los Angeles." },
+  "index.html": { path: "/", title: "Sky Thomas Gidge — Video Editor, Journalist & AI Toolmaker",
+    desc: "Sky Thomas Gidge is a video editor and journalist between Shenzhen and Los Angeles who also builds useful AI tools — a pre-publish compliance checker, autonomous story finders, a bilingual newsletter about Claude. Night photography and investigative writing." },
   "writing.html": { path: "/writing.html", title: "Writing — Sky Thomas Gidge",
     desc: "Journalism by Sky Thomas Gidge — features, investigations, breaking news and street portraits from Shenzhen, published in Shenzhen Daily and That's Magazines, 2015–2018." },
   "photography.html": { path: "/photography.html", title: "Photography — Sky Thomas Gidge",
@@ -73,7 +73,7 @@ function siteJsonLd() {
     "@graph": [
       { "@type": "Person", "@id": SITE + "/#person",
         name: id.name, url: SITE + "/", image: OG_IMAGE,
-        jobTitle: "AI Creative Technologist",
+        jobTitle: "Video Editor, Journalist & AI Toolmaker",
         description: id.bio,
         email: "mailto:" + id.email,
         sameAs: socialUrls() },
