@@ -72,7 +72,7 @@ function siteJsonLd() {
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Person", "@id": SITE + "/#person",
-        name: id.name, url: SITE + "/", image: OG_IMAGE,
+        name: id.name, url: SITE + "/", image: SITE + "/uploads/sky-thomas-gidge-portrait.jpg",
         jobTitle: "Video Editor, Journalist & AI Toolmaker",
         description: id.bio,
         email: "mailto:" + id.email,
