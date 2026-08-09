@@ -448,7 +448,7 @@ window.SKY = (function () {
 
   const identity = {
     name: "Sky Thomas Gidge",
-    roles: ["Photographer", "Journalist", "AI practitioner"],
+    roles: ["Video editor", "Photographer", "Journalist", "AI toolmaker"],
     places: "Shenzhen · Los Angeles",
     email: "sgidge@gmail.com",
     social: {
@@ -458,7 +458,7 @@ window.SKY = (function () {
       instagram: "https://www.instagram.com/skythomasgidge",
       twitter: "https://x.com/SkyThomasGidge"
     },
-    bio: "Video editor, photographer, journalist, and AI practitioner working between Shenzhen and Los Angeles. Night photography and street work from South China. Brand video for Insta360 and DJI. Investigative reporting for That's Magazines. And a growing kit of Claude tools that actually reduce the work.",
+    bio: "Video editor, photographer, journalist, and AI toolmaker working between Shenzhen and Los Angeles. Night photography and street work from South China. Brand video for Insta360 and DJI. Investigative reporting for That's Magazines. And a growing kit of AI tools that actually reduce the work.",
     clients: ["Insta360", "DJI", "Whiskey Bottle Co."]
   };
 
