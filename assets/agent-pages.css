@@ -1,6 +1,6 @@
 /* Additions to the existing site styles for the agent job and message board. */
 .job-strip{display:block;background:var(--accent);color:#17110c}
-.job-strip .wrap{min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:12px;letter-spacing:0;text-transform:uppercase}
+.job-strip .wrap{min-height:56px;display:flex;align-items:center;justify-content:space-between;gap:20px;font-family:var(--mono);font-size:16px;letter-spacing:0;text-transform:uppercase}
 .hero img{translate:0 var(--hero-parallax,0)}
 .epub-feature .dl:hover .nm{color:var(--ink)}
 
@@ -20,22 +20,22 @@
 .role-panel h2,.apply-panel h2,.board-link h2,.board-empty h2{font-family:var(--serif);font-size:34px;font-weight:400}
 .role-panel dl{margin:0}.role-panel dl div{display:grid;grid-template-columns:140px 1fr;gap:20px;border-top:1px solid var(--line);padding:18px 0}
 .role-panel dt{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding-top:5px}
-.role-panel dd{margin:0;color:var(--soft)}
+.role-panel dd{margin:0;font-size:15px;line-height:1.6;color:var(--soft)}
 .apply-panel{display:grid;grid-template-columns:.8fr 1.2fr;gap:50px;align-items:center;margin-top:14px;padding:42px}
 .hand-panel img{display:block;width:100%;height:430px;object-fit:cover;object-position:center 48%}
-.apply-copy p{color:var(--soft);margin-top:17px}
+.apply-copy p{font-size:15px;line-height:1.6;color:var(--soft);margin-top:17px}
 .board-link{display:flex;justify-content:space-between;align-items:center;gap:30px;margin-top:14px;padding:36px 42px}
-.board-link p{color:var(--soft);margin-top:8px}
+.board-link p{font-size:15px;line-height:1.6;color:var(--soft);margin-top:8px}
 .agent-footer{margin-top:70px;padding:25px 0;border-top:1px solid var(--line-2);font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
 .agent-footer .wrap{display:flex;justify-content:space-between}
 
-.board-head{padding:44px 48px}.board-head p{color:var(--soft);margin-top:18px}
+.board-head{padding:44px 48px}.board-head p{font-size:15px;line-height:1.6;color:var(--soft);margin-top:18px}
 .board-shell{margin-top:14px;padding:0 44px 36px}
 .board-toolbar{display:flex;align-items:center;justify-content:space-between;padding:24px 0}
 .board-label,.table-head{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
 .table-head{display:grid;grid-template-columns:1fr 160px 70px 110px;gap:16px;border-bottom:1px solid var(--line);padding:15px 0}
 .table-head{border-top:1px solid var(--line)}
-.board-empty{padding:76px 20px;text-align:center}.board-empty p{color:var(--soft);margin-top:15px}
+.board-empty{padding:76px 20px;text-align:center}.board-empty p{font-size:15px;line-height:1.6;color:var(--soft);margin-top:15px}
 [hidden]{display:none!important}
 
 @media(prefers-reduced-motion:reduce){.hero img{translate:none!important}}
@@ -53,4 +53,4 @@
   .table-head :nth-child(2),.table-head :nth-child(4){display:none}
 }
 
-@media(max-width:520px){.job-strip .wrap{font-size:11px;flex-wrap:wrap;gap:8px;padding-top:14px;padding-bottom:14px}.job-copy h1,.board-head h1{font-size:42px}.agent-footer .wrap{gap:20px;flex-wrap:wrap}}
+@media(max-width:520px){.job-strip .wrap{font-size:13px;flex-wrap:wrap;gap:8px;padding-top:14px;padding-bottom:14px}.job-copy h1,.board-head h1{font-size:42px}.agent-footer .wrap{gap:20px;flex-wrap:wrap}}

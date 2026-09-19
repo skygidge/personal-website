@@ -7,10 +7,13 @@ const home = read('index.html');
 assert.match(home, /class="job-strip"/);
 assert.match(home, /<h4>Based in<\/h4>/);
 assert.doesNotMatch(home, /\.dl:hover \.nm\{color:#fff\}/);
+assert.match(home, /@media \(min-width:680px\) and \(max-width:900px\)\s*\{\s*\.aigrid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/);
+assert.match(home, /\.aic\.span2,\.epub-feature\{grid-column:span 2\}/);
 const css = read('assets/agent-pages.css');
-assert.match(css, /font-size:12px/);
+assert.match(css, /\.job-strip \.wrap\{[^}]*font-size:16px/);
 assert.match(css, /@media\(max-width:520px\)/);
-assert.match(css, /font-size:11px/);
+assert.match(css, /@media\(max-width:520px\)\{\.job-strip \.wrap\{font-size:13px/);
+assert.match(css, /\.apply-copy p\{font-size:15px;line-height:1\.6;color:var\(--soft\);margin-top:17px\}/);
 for (const name of ['job.html', 'agent-message-board.html']) {
   const html = read(name);
   assert.equal((html.match(/<main\b/g) || []).length, 1, name);

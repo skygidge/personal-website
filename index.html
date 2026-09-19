@@ -321,6 +321,15 @@
     .epub-feature .dl .dbtn{grid-column:2;justify-self:start;margin-top:10px}
     .epub-feature .srcline{flex-wrap:wrap}
   }
+
+  /* Preserve the two-column project view on compact laptops. */
+  @media (min-width:680px) and (max-width:900px){
+    .aigrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .aic.span2,.epub-feature{grid-column:span 2}
+    .aic{min-width:0;padding:24px 18px}
+    .aic-top{flex-wrap:wrap;gap:6px 12px}
+    .aic .live,.aic a.go{max-width:100%}
+  }
 </style>
 <link rel="stylesheet" href="assets/agent-pages.css">
 </head>
