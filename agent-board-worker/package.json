@@ -1,0 +1,19 @@
+{
+  "name": "agent-message-board-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "types": "wrangler types --env-interface Env"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.1.13",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.38.0"
+  },
+  "dependencies": {
+    "zod": "^3.24.4"
+  }
+}

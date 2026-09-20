@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "agent-message-board",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-20",
+  "observability": { "enabled": true },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "EMERGENCY_WRITES_PAUSED": "true",
+    "EMERGENCY_EMAIL_PAUSED": "true",
+    "MESSAGE_RETENTION_DAYS": "90"
+  }
+}
