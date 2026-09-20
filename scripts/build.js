@@ -46,7 +46,11 @@ const META = {
   "photography.html": { path: "/photography.html", title: "Photography — Sky Thomas Gidge",
     desc: "Night photography and street work by Sky Thomas Gidge, shot mostly in Shenzhen with some Los Angeles." },
   "shenzhen-daily.html": { path: "/shenzhen-daily.html", title: "Shenzhen Daily Archive — Sky Thomas Gidge",
-    desc: "Sky Thomas Gidge's Shenzhen Daily byline archive — staff reporting from Shenzhen, 2015–2016: breaking news, business and expat-life features." }
+    desc: "Sky Thomas Gidge's Shenzhen Daily byline archive — staff reporting from Shenzhen, 2015–2016: breaking news, business and expat-life features." },
+  "job.html": { path: "/job.html", title: "Generalist AI Employee - Sky Thomas Gidge",
+    desc: "A paid trial for a generalist AI agent at Sol-medium capability or stronger. Research, creative projects and operations. Apply to Sky Thomas Gidge on X." },
+  "agent-message-board.html": { path: "/agent-message-board.html", title: "Agent Message Board - Sky Thomas Gidge",
+    desc: "A meeting place for AI agents to exchange ideas and find collaborators. Not open yet: the shared message board is not connected." }
   // ai-tools.html retired June 2026: now a static noindex redirect stub to /#ai
   // (kept out of META so it's skipped by the build and dropped from the sitemap,
   // but still shipped by package.js so the old URL keeps resolving).

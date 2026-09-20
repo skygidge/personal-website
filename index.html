@@ -308,7 +308,7 @@
     transition:color .2s,border-color .2s,background .2s;cursor:pointer;align-self:start}
   .epub-feature .dbtn:hover{color:#fff;border-color:var(--accent);background:rgba(212,102,58,.1)}
   .epub-feature .dbtn .ar{color:var(--accent)}
-  .epub-feature .dl:hover .nm{color:#fff}
+  .epub-feature .dl:hover .nm{color:var(--ink)}
   @media(max-width:900px){
     .epub-feature{grid-column:span 1}
     .epub-feature .layA{grid-template-columns:1fr;gap:32px}
@@ -321,7 +321,17 @@
     .epub-feature .dl .dbtn{grid-column:2;justify-self:start;margin-top:10px}
     .epub-feature .srcline{flex-wrap:wrap}
   }
+
+  /* Preserve the two-column project view on compact laptops. */
+  @media (min-width:680px) and (max-width:900px){
+    .aigrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .aic.span2,.epub-feature{grid-column:span 2}
+    .aic{min-width:0;padding:24px 18px}
+    .aic-top{flex-wrap:wrap;gap:6px 12px}
+    .aic .live,.aic a.go{max-width:100%}
+  }
 </style>
+<link rel="stylesheet" href="assets/agent-pages.css">
 </head>
 <body>
   <div class="top" id="top"><div class="wrap">
@@ -347,6 +357,8 @@ I&#39;m a video editor and photographer. Sometimes a journalist. Lately, against
     </div>
     <div class="scroll"><span>Scroll</span><span class="ln"></span></div>
   </header>
+
+  <a class="job-strip" href="job.html"><span class="wrap"><span>Job opportunity: Generalist AI Employee</span><span>View opening →</span></span></a>
 
   <main>
     <section id="photography">
@@ -406,7 +418,7 @@ See all 50
   <a class="live" href="https://skysprepost.app" target="_blank" rel="noopener"><span class="dot"></span>It's live — have a look ↗</a></div>
 <div class="aic">
   <div class="aic-top"><span class="st">Case study</span><span class="mt">SALES INSIGHT</span></div>
-  <h3>Sales Analysis: David</h3><p>One of our best salesmen, David, was mic&#39;d during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. And accurately. Claude turned what David did and said on the floor into a data-driven snapshot of his performance. The sales count came out correct, David found the results insightful — and he agreed with Claude&#39;s suggestion to frame the product around what it does for the customer. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.</p>
+  <h3>Sales Analysis: David</h3><p>Our best salesman, David, was mic&#39;d during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.</p>
   <div class="shot"><img src="uploads/sales-analysis-david.jpg" alt="Sales Analysis: David" loading="lazy"></div>
   <div class="tags"><span>Transcribed footage</span><span>Human-checked</span></div>
   </div>
@@ -514,7 +526,7 @@ See all 50
 <!--/BUILD:social--></div>
           </div>
           <div>
-            <h4>Based</h4>
+            <h4>Based in</h4>
             <ul><li>Shenzhen</li><li>Los Angeles</li></ul>
           </div>
         </div>

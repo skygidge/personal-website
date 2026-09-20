@@ -24,6 +24,24 @@
     on(); window.addEventListener("scroll", on, { passive: true });
   }
 
+  // Use translate independently of the hero's existing slow-zoom transform.
+  function initParallax() {
+    var hero = document.querySelector('.hero');
+    if (!hero) return;
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var queued = false;
+    function update() {
+      var progress = Math.min(Math.max(window.scrollY, 0), hero.offsetHeight) / (hero.offsetHeight || 1);
+      hero.style.setProperty('--hero-parallax', reduced.matches ? '0px' : Math.round(progress * 24) + 'px');
+      queued = false;
+    }
+    window.addEventListener('scroll', function () {
+      if (!queued && !reduced.matches) { queued = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    reduced.addEventListener('change', update);
+    update();
+  }
+
   // ---------- lightbox (built from [data-lb] elements) ----------
   var root, groups = {}, cur = [], idx = 0, lastTrigger = null;
   function ensure() {
@@ -156,7 +174,7 @@
     if (t) requestAnimationFrame(function () { anchorScroll(t); });
   }
 
-  function init() { initReveal(); initChrome(); initLightbox(); initAnchors(); }
+  function init() { initReveal(); initChrome(); initParallax(); initLightbox(); initAnchors(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 })();

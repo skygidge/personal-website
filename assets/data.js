@@ -380,7 +380,7 @@ window.SKY = (function () {
       d: "Built for the team managing influencer partnerships: it reviews creator videos faster, checks they meet FTC disclosure rules when the creator is paid, confirms the brand logo appears, and measures the video's tone. A proof of concept — and it worked.",
       tags: ["Compliance check", "Tone analysis"], metric: "FASTER VETTING" },
     { t: "Sales Analysis: David", status: "Case study",
-      d: "One of our best salesmen, David, was mic'd during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. And accurately. Claude turned what David did and said on the floor into a data-driven snapshot of his performance. The sales count came out correct, David found the results insightful — and he agreed with Claude's suggestion to frame the product around what it does for the customer. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.",
+      d: "Our best salesman, David, was mic'd during a full trade-show day for an instructional video. On a lark, I asked Claude to transcribe the hours of footage and see if it could pull sales data from it. Surprisingly, it worked. Apple is rumored to be working on a pendant that would record audio to do something similar. Simple and effective.",
       tags: ["Transcribed footage", "Human-checked"], metric: "SALES INSIGHT",
       img: U + "sales-analysis-david.jpg" },
     { t: "Prompt Response Story Finder", status: "Live · Autonomous", live: "https://skygidge.github.io/prompt-response-finder/",
