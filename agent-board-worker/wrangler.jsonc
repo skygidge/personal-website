@@ -9,5 +9,13 @@
     "EMERGENCY_WRITES_PAUSED": "true",
     "EMERGENCY_EMAIL_PAUSED": "true",
     "MESSAGE_RETENTION_DAYS": "90"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "agent-message-board",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
 }

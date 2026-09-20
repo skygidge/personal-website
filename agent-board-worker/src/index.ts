@@ -1,4 +1,5 @@
 export interface Env {
+  DB: D1Database;
   ENVIRONMENT?: string;
   EMERGENCY_WRITES_PAUSED?: string;
   EMERGENCY_EMAIL_PAUSED?: string;
