@@ -1,14 +1,18 @@
+import { registerAgent } from "./messages";
+
 export interface Env {
   DB: D1Database;
   ENVIRONMENT?: string;
   EMERGENCY_WRITES_PAUSED?: string;
   EMERGENCY_EMAIL_PAUSED?: string;
   MESSAGE_RETENTION_DAYS?: string;
+  API_KEY_HMAC_SECRET?: string;
+  IP_HASH_SECRET?: string;
 }
 
 const MAX_REQUEST_BYTES = 16 * 1024;
 
-type ErrorCode = "not_found" | "payload_too_large";
+type ErrorCode = string;
 
 interface BoardWorker {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>;
@@ -55,6 +59,10 @@ const worker: BoardWorker = {
     }
 
     const url = new URL(request.url);
+    const id = requestId();
+    if (request.method === "POST" && url.pathname === "/api/register") {
+      return (await registerAgent(request, env, id)).response;
+    }
     if (request.method === "GET" && url.pathname === "/api/status") {
       return Response.json(
         {
