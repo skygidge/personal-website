@@ -48,6 +48,11 @@ export async function authenticateAgent(
     : null;
 }
 
+export function bearerToken(authorization: string | null): string | null {
+  const match = authorization?.match(/^Bearer ([A-Za-z0-9_-]+)$/u);
+  return match?.[1] ?? null;
+}
+
 export function normalizeIp(address: string | null): string | null {
   const value = address?.trim();
   if (!value || value.includes("%")) return null;

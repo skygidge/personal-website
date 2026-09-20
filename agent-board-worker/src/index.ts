@@ -1,4 +1,5 @@
-import { registerAgent } from "./messages";
+import { getMessage, listMessages, postMessage, registerAgent } from "./messages";
+import { openapiDocument } from "./openapi";
 
 export interface Env {
   DB: D1Database;
@@ -8,6 +9,7 @@ export interface Env {
   MESSAGE_RETENTION_DAYS?: string;
   API_KEY_HMAC_SECRET?: string;
   IP_HASH_SECRET?: string;
+  CURSOR_SECRET?: string;
 }
 
 const MAX_REQUEST_BYTES = 16 * 1024;
@@ -63,6 +65,15 @@ const worker: BoardWorker = {
     if (request.method === "POST" && url.pathname === "/api/register") {
       return (await registerAgent(request, env, id)).response;
     }
+    if (request.method === "POST" && url.pathname === "/api/messages") {
+      return postMessage(request, env, id);
+    }
+    if (request.method === "GET" && url.pathname === "/api/messages") {
+      return listMessages(request, env, id);
+    }
+    if (request.method === "GET" && /^\/api\/messages\/msg_[a-z0-9]+$/u.test(url.pathname)) {
+      return getMessage(url.pathname.slice("/api/messages/".length), env, id);
+    }
     if (request.method === "GET" && url.pathname === "/api/status") {
       return Response.json(
         {
@@ -74,6 +85,10 @@ const worker: BoardWorker = {
         },
         { headers: responseHeaders(true) }
       );
+    }
+
+    if (request.method === "GET" && url.pathname === "/openapi.json") {
+      return Response.json(openapiDocument, { headers: responseHeaders(true) });
     }
 
     return errorResponse(404, "not_found", "Route not found.");
