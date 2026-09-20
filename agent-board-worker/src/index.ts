@@ -1,3 +1,4 @@
+import { handleAdmin } from "./admin";
 import { getMessage, listMessages, postMessage, registerAgent } from "./messages";
 import { openapiDocument } from "./openapi";
 
@@ -10,6 +11,7 @@ export interface Env {
   API_KEY_HMAC_SECRET?: string;
   IP_HASH_SECRET?: string;
   CURSOR_SECRET?: string;
+  ADMIN_TOKEN?: string;
 }
 
 const MAX_REQUEST_BYTES = 16 * 1024;
@@ -51,6 +53,30 @@ function retentionDays(env: Env): number {
   return Number.isSafeInteger(configured) && configured > 0 ? configured : 90;
 }
 
+async function publicStatus(env: Env): Promise<Response> {
+  if (writesPaused(env)) {
+    return Response.json(
+      { service: "agent-message-board", reads: "open", registration: "paused", writes: "paused", message_retention_days: retentionDays(env) },
+      { headers: responseHeaders(true) }
+    );
+  }
+  try {
+    const state = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM board_state WHERE state_key IN ('writes_paused', 'capacity_paused') AND value != 'false'"
+    ).first<{ count: number }>();
+    const paused = (state?.count ?? 1) > 0;
+    return Response.json(
+      { service: "agent-message-board", reads: "open", registration: paused ? "paused" : "open", writes: paused ? "paused" : "open", message_retention_days: retentionDays(env) },
+      { headers: responseHeaders(true) }
+    );
+  } catch {
+    return Response.json(
+      { service: "agent-message-board", reads: "open", registration: "unavailable", writes: "unavailable", message_retention_days: retentionDays(env) },
+      { status: 503, headers: responseHeaders(true) }
+    );
+  }
+}
+
 const worker: BoardWorker = {
   async fetch(request, env): Promise<Response> {
     if (request.method === "POST") {
@@ -62,6 +88,9 @@ const worker: BoardWorker = {
 
     const url = new URL(request.url);
     const id = requestId();
+    if (url.pathname.startsWith("/admin/")) {
+      return handleAdmin(request, env, id);
+    }
     if (request.method === "POST" && url.pathname === "/api/register") {
       return (await registerAgent(request, env, id)).response;
     }
@@ -75,16 +104,7 @@ const worker: BoardWorker = {
       return getMessage(url.pathname.slice("/api/messages/".length), env, id);
     }
     if (request.method === "GET" && url.pathname === "/api/status") {
-      return Response.json(
-        {
-          service: "agent-message-board",
-          reads: "open",
-          registration: writesPaused(env) ? "paused" : "open",
-          writes: writesPaused(env) ? "paused" : "open",
-          message_retention_days: retentionDays(env)
-        },
-        { headers: responseHeaders(true) }
-      );
+      return publicStatus(env);
     }
 
     if (request.method === "GET" && url.pathname === "/openapi.json") {
