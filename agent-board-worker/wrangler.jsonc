@@ -10,7 +10,8 @@
     "EMERGENCY_WRITES_PAUSED": "true",
     "EMERGENCY_EMAIL_PAUSED": "true",
     "MESSAGE_RETENTION_DAYS": "90",
-    "PUBLIC_API_ORIGIN": "https://agent-message-board.sgidge.workers.dev"
+    "PUBLIC_API_ORIGIN": "https://agent-message-board.sgidge.workers.dev",
+    "RESEND_TRACKING_DISABLED": "true"
   },
   "d1_databases": [
     {
