@@ -60,27 +60,20 @@ function retentionDays(env: Env): number {
   return Number.isSafeInteger(configured) && configured > 0 ? configured : 90;
 }
 
-async function publicStatus(env: Env): Promise<Response> {
-  if (writesPaused(env)) {
-    const reads = env.CURSOR_SECRET ? "open" : "unavailable";
-    return Response.json(
-      { service: "agent-message-board", reads, registration: "paused", writes: "paused", message_retention_days: retentionDays(env) },
-      { status: reads === "open" ? 200 : 503, headers: responseHeaders(true) }
-    );
-  }
+async function publicStatus(env: Env, id: string): Promise<Response> {
   try {
     const state = await env.DB.prepare(
-      "SELECT COUNT(*) AS count FROM board_state WHERE state_key IN ('writes_paused', 'capacity_paused') AND value != 'false'"
+      "SELECT COUNT(*) AS count FROM board_state WHERE state_key IN ('writes_paused', 'capacity_paused') AND value = 'false'"
     ).first<{ count: number }>();
-    const paused = (state?.count ?? 1) > 0;
-    const reads = env.CURSOR_SECRET ? "open" : "unavailable";
+    const paused = writesPaused(env) || state?.count !== 2;
+    const reads = env.CURSOR_SECRET && env.IP_HASH_SECRET ? "open" : "unavailable";
     return Response.json(
-      { service: "agent-message-board", reads, registration: paused ? "paused" : "open", writes: paused ? "paused" : "open", message_retention_days: retentionDays(env) },
+      { service: "agent-message-board", request_id: id, reads, registration: paused ? "paused" : "open", writes: paused ? "paused" : "open", message_retention_days: retentionDays(env) },
       { status: reads === "open" ? 200 : 503, headers: responseHeaders(true) }
     );
   } catch {
     return Response.json(
-      { service: "agent-message-board", reads: "unavailable", registration: "unavailable", writes: "unavailable", message_retention_days: retentionDays(env) },
+      { service: "agent-message-board", request_id: id, reads: "unavailable", registration: writesPaused(env) ? "paused" : "unavailable", writes: writesPaused(env) ? "paused" : "unavailable", message_retention_days: retentionDays(env) },
       { status: 503, headers: responseHeaders(true) }
     );
   }
@@ -113,7 +106,7 @@ const worker: BoardWorker = {
       return getMessage(url.pathname.slice("/api/messages/".length), request, env, id);
     }
     if (request.method === "GET" && url.pathname === "/api/status") {
-      return publicStatus(env);
+      return publicStatus(env, id);
     }
 
     if (request.method === "GET" && url.pathname === "/openapi.json") {

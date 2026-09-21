@@ -25,7 +25,7 @@ async function resetBoard(): Promise<void> {
     env.DB.prepare("DELETE FROM audit_events"),
     env.DB.prepare("DELETE FROM agents"),
     env.DB.prepare("DELETE FROM quota_counters"),
-    env.DB.prepare("UPDATE board_state SET value = 'false' WHERE state_key IN ('writes_paused', 'email_paused', 'capacity_paused')")
+    env.DB.prepare("INSERT OR REPLACE INTO board_state (state_key, value, updated_at) VALUES ('writes_paused', 'false', 0), ('email_paused', 'false', 0), ('capacity_paused', 'false', 0)")
   ]);
 }
 
@@ -62,6 +62,44 @@ async function post(agent: { apiKey: string }, idempotencyKey: string, replyTo?:
 
 describe("administrative controls", () => {
   beforeEach(resetBoard);
+
+  it.each(["writes", "email"])("recreates a missing %s pause control before reporting success", async (control) => {
+    const stateKey = `${control}_paused`;
+    await env.DB.prepare("DELETE FROM board_state WHERE state_key = ?").bind(stateKey).run();
+    const response = await worker.fetch(adminRequest(`/admin/pause-${control}`), testEnv, {} as ExecutionContext);
+    expect(response.status).toBe(200);
+    expect(await env.DB.prepare("SELECT value FROM board_state WHERE state_key = ?").bind(stateKey).first("value")).toBe("true");
+    const resume = await worker.fetch(adminRequest(`/admin/resume-${control}`), testEnv, {} as ExecutionContext);
+    expect(resume.status).toBe(200);
+    expect(await env.DB.prepare("SELECT value FROM board_state WHERE state_key = ?").bind(stateKey).first("value")).toBe("false");
+  });
+
+  it.each(["writes_paused", "email_paused", "capacity_paused"])("reports missing %s as paused", async (stateKey) => {
+    await env.DB.prepare("DELETE FROM board_state WHERE state_key = ?").bind(stateKey).run();
+    const response = await worker.fetch(adminRequest("/admin/status", "GET"), testEnv, {} as ExecutionContext);
+    const body = await response.json() as { writes_paused: boolean; email_paused: boolean; capacity: { state: string } };
+    expect(stateKey === "email_paused" ? body.email_paused : body.writes_paused).toBe(true);
+    if (stateKey === "capacity_paused") expect(body.capacity.state).toBe("paused");
+  });
+
+  it.each([
+    [0, null, false],
+    [1, 1000, true],
+    [0, 1000, true]
+  ] as const)("preserves attempted digest membership on hide (attempts=%s, first=%s)", async (attempts, firstAttempt, retained) => {
+    const agent = await createAgent();
+    const response = await post(agent, "digest-hide-membership");
+    const message = await response.json() as { message_id: string };
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO digest_batches (batch_id, interval_start, state, payload_hash, attempt_count, first_attempt_at, created_at) VALUES ('batch_hide', 0, 'pending', 'immutable-hash', ?, ?, 1)").bind(attempts, firstAttempt),
+      env.DB.prepare("INSERT INTO digest_messages (batch_id, message_id) VALUES ('batch_hide', ?)").bind(message.message_id)
+    ]);
+    const hidden = await worker.fetch(adminRequest(`/admin/messages/${message.message_id}/hide`), testEnv, {} as ExecutionContext);
+    expect(hidden.status).toBe(200);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM digest_messages WHERE batch_id = 'batch_hide'").first("count")).toBe(retained ? 1 : 0);
+    expect(await env.DB.prepare("SELECT payload_hash FROM digest_batches WHERE batch_id = 'batch_hide'").first("payload_hash")).toBe("immutable-hash");
+    expect(await env.DB.prepare("SELECT hidden_at FROM messages WHERE message_id = ?").bind(message.message_id).first("hidden_at")).not.toBeNull();
+  });
 
   it("rejects missing and wrong owner tokens without creating audit records", async () => {
     const missing = await worker.fetch(new Request("https://board.example/admin/pause-writes", { method: "POST" }), testEnv, {} as ExecutionContext);

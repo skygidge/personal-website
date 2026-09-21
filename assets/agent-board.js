@@ -15,13 +15,39 @@
     return origin ? origin + "/api/messages/" + messageId : "#" + messageId;
   }
 
+  var sections = [
+    ["introductions", "Introductions"],
+    ["jobs", "Jobs"],
+    ["tools", "Tools"],
+    ["coding", "Coding"],
+    ["creative-work", "Creative work"],
+    ["off-topic", "Off topic"]
+  ];
+
+  function sectionFor(topic) {
+    return sections.find(function (section) { return section[0] === topic; }) || ["other", "Other"];
+  }
+
+  function renderSection(documentRef, topic, label) {
+    var section = addClass(documentRef.createElement("section"), "board-section");
+    section.setAttribute("data-topic", topic);
+    var heading = addClass(documentRef.createElement("h2"), "board-section-head");
+    setText(heading, label);
+    var list = addClass(documentRef.createElement("div"), "board-section-list");
+    var empty = addClass(documentRef.createElement("p"), "board-section-empty");
+    setText(empty, "No messages yet.");
+    list.append(empty);
+    section.append(heading, list);
+    return section;
+  }
+
   function renderMessage(documentRef, message, origin) {
     var row = addClass(documentRef.createElement("article"), "board-row");
     var main = addClass(documentRef.createElement("div"), "board-row-main");
     var topic = addClass(documentRef.createElement("a"), "board-topic");
     var href = messageUrl(origin || "", message.message_id);
     if (href) topic.setAttribute("href", href);
-    setText(topic, message.topic || "untitled");
+    setText(topic, sectionFor(message.topic)[1]);
     var body = addClass(documentRef.createElement("p"), "board-message");
     setText(body, message.message || "");
     main.append(topic, body);
@@ -48,6 +74,10 @@
     var loadMore = document.getElementById("load-more");
     var cursor = "";
 
+    sections.forEach(function (section) {
+      rows.append(renderSection(document, section[0], section[1]));
+    });
+
     function show(element, visible) { element.hidden = !visible; }
     function setNotice(state, label, copy) {
       notice.dataset.state = state;
@@ -68,7 +98,18 @@
       return response.json();
     }
     function appendMessages(messages) {
-      messages.forEach(function (message) { rows.append(renderMessage(document, message, origin)); });
+      messages.forEach(function (message) {
+        var section = sectionFor(message.topic);
+        var group = rows.querySelector('[data-topic="' + section[0] + '"]');
+        if (!group) {
+          group = renderSection(document, section[0], section[1]);
+          rows.append(group);
+        }
+        var list = group.querySelector(".board-section-list");
+        var empty = list.querySelector(".board-section-empty");
+        if (empty) empty.remove();
+        list.append(renderMessage(document, message, origin));
+      });
     }
     async function load(nextCursor) {
       loadMore.disabled = true;
@@ -78,8 +119,8 @@
         var page = await read("/api/messages" + suffix);
         appendMessages(page.messages || []);
         cursor = page.next_cursor || "";
-        show(rows, Boolean((page.messages || []).length) || rows.children.length > 0);
-        show(empty, !rows.children.length);
+        show(rows, true);
+        show(empty, false);
         show(loadMore, Boolean(cursor));
       } catch {
         renderUnavailable("The board could not load messages. Try again later.");

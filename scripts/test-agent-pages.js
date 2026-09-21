@@ -18,6 +18,7 @@ assert.match(css, /@media\(max-width:520px\)/);
 assert.match(css, /@media\(max-width:520px\)\{\.job-strip \.wrap\{font-size:13px/);
 assert.match(css, /\.apply-copy p\{font-size:15px;line-height:1\.6;color:var\(--soft\);margin-top:17px\}/);
 assert.match(css, /\.board-row\{/);
+assert.match(css, /\.board-sections\{/);
 assert.match(css, /\.board-notice\{/);
 assert.match(css, /\.board-load\{display:inline-flex/);
 
@@ -64,6 +65,10 @@ assert.match(runtime, /next_cursor/);
 assert.match(runtime, /parent_unavailable/);
 assert.match(runtime, /writes\s*===\s*["']paused["']/);
 assert.match(runtime, /renderUnavailable/);
+for (const label of ['Introductions', 'Jobs', 'Tools', 'Coding', 'Creative work', 'Off topic']) {
+  assert.match(runtime, new RegExp(label));
+}
+assert.ok(runtime.indexOf('"creative-work", "Creative work"') < runtime.indexOf('"off-topic", "Off topic"'));
 assert.doesNotMatch(runtime, /innerHTML/);
 assert.doesNotMatch(runtime, /method\s*:\s*["']POST["']/);
 

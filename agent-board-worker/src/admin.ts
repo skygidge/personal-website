@@ -44,10 +44,14 @@ function auditStatement(db: D1Database, timestamp: number, action: string, targe
 async function setBoardState(env: Env, requestId: string, stateKey: "writes_paused" | "email_paused", value: "true" | "false", action: string): Promise<Response> {
   const timestamp = Date.now();
   try {
-    await env.DB.batch([
-      env.DB.prepare("UPDATE board_state SET value = ?, updated_at = ? WHERE state_key = ?").bind(value, timestamp, stateKey),
+    const results = await env.DB.batch<{ value: string }>([
+      env.DB.prepare(
+        "INSERT INTO board_state (state_key, value, updated_at) VALUES (?, ?, ?) " +
+        "ON CONFLICT(state_key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at RETURNING value"
+      ).bind(stateKey, value, timestamp),
       auditStatement(env.DB, timestamp, action, "board_state", stateKey, requestId, "success")
     ]);
+    if (results[0]?.results[0]?.value !== value) throw new Error("board_state_not_updated");
     return Response.json({ state: stateKey, value: value === "true" ? "paused" : "open", request_id: requestId }, { headers: headers() });
   } catch {
     return errorResponse(requestId, { status: 503, code: "service_unavailable", message: "Administrative control is unavailable." });
@@ -78,7 +82,7 @@ async function hideMessage(env: Env, requestId: string, messageId: string): Prom
     const outcome = existing ? "success" : "not_found";
     await env.DB.batch([
       ...(existing ? [env.DB.prepare(
-        "DELETE FROM digest_messages WHERE message_id = ? AND batch_id IN (SELECT batch_id FROM digest_batches WHERE state = 'pending')"
+        "DELETE FROM digest_messages WHERE message_id = ? AND batch_id IN (SELECT batch_id FROM digest_batches WHERE state = 'pending' AND attempt_count = 0 AND first_attempt_at IS NULL)"
       ).bind(messageId)] : []),
       ...(existing ? [env.DB.prepare("UPDATE messages SET hidden_at = ?, hidden_reason = 'owner' WHERE message_id = ? AND hidden_at IS NULL").bind(timestamp, messageId)] : []),
       auditStatement(env.DB, timestamp, "hide_message", "message", messageId, requestId, outcome)
@@ -99,11 +103,11 @@ async function privateStatus(env: Env, requestId: string): Promise<Response> {
       env.DB.prepare("SELECT state, COUNT(*) AS count FROM digest_batches GROUP BY state").all<{ state: string; count: number }>(),
     ]);
     const switches = new Map(states.results.map((state) => [state.state_key, state.value !== "false"]));
-    const capacityPaused = switches.get("capacity_paused") || false;
+    const capacityPaused = switches.get("capacity_paused") !== false;
     const capacity = capacityReport(env, states.results.find((state) => state.state_key === "capacity_bytes")?.value);
     return Response.json({
-      writes_paused: switches.get("writes_paused") || capacityPaused,
-      email_paused: switches.get("email_paused") || false,
+      writes_paused: switches.get("writes_paused") !== false || capacityPaused,
+      email_paused: switches.get("email_paused") !== false,
       capacity: { ...capacity, state: capacityPaused ? "paused" : capacity.state },
       quota_events: quota?.used ?? 0,
       digest_batches: Object.fromEntries(digests.results.map((batch) => [batch.state, batch.count])),

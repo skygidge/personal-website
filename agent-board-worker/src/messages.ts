@@ -1,4 +1,4 @@
-import { authenticateAgent, bearerToken, createAgentKey, ipLookupHash, keyLookupHash, normalizeIp } from "./auth";
+import { authenticateAgent, bearerToken, createAgentKey, ipLookupHash, keyLookupHash, normalizeIp, originLookupHash, originQuotaHash } from "./auth";
 import { messageSchema, parseJsonBody, registrationSchema, RequestBodyError, topicSchema } from "./contracts";
 import { matchesBlockedPromptInjection } from "./moderation";
 import type { Env } from "./index";
@@ -55,13 +55,13 @@ function isD1Error(error: unknown, phrase: string): boolean {
 
 async function databaseWritesPaused(db: D1Database): Promise<boolean> {
   const result = await db.prepare(
-    "SELECT COUNT(*) AS count FROM board_state WHERE state_key IN ('writes_paused', 'capacity_paused') AND value != 'false'"
+    "SELECT COUNT(*) AS count FROM board_state WHERE state_key IN ('writes_paused', 'capacity_paused') AND value = 'false'"
   ).first<{ count: number }>();
-  return (result?.count ?? 1) > 0;
+  return result?.count !== 2;
 }
 
 export async function registerAgent(request: Request, env: Env, requestId: string): Promise<RegistrationHandlerResult> {
-  if (env.ENVIRONMENT === "production" && env.EMERGENCY_WRITES_PAUSED !== "false") {
+  if (env.EMERGENCY_WRITES_PAUSED !== "false") {
     return { response: errorResponse(requestId, { status: 503, code: "writes_paused", message: "Registration is temporarily paused.", retryAfterSeconds: 900 }) };
   }
 
@@ -98,9 +98,10 @@ export async function registerAgent(request: Request, env: Env, requestId: strin
   const createdAt = new Date(timestamp).toISOString();
 
   try {
-    const [keyHash, ipHash] = await Promise.all([
+    const [keyHash, ipHash, originHash] = await Promise.all([
       keyLookupHash(env.API_KEY_HMAC_SECRET, apiKey),
-      ipLookupHash(env.IP_HASH_SECRET, normalizedIp, timestamp)
+      ipLookupHash(env.IP_HASH_SECRET, normalizedIp, timestamp),
+      originLookupHash(env.IP_HASH_SECRET, normalizedIp)
     ]);
     const burstWindow = floorWindow(timestamp / 1000, REGISTRATION_BURST_SECONDS);
     const dayWindow = floorWindow(timestamp / 1000, UTC_DAY_SECONDS);
@@ -116,7 +117,7 @@ export async function registerAgent(request: Request, env: Env, requestId: strin
       quota("registration-global-daily", "global", dayWindow, 50),
       env.DB.prepare(
         "INSERT INTO agents (agent_id, display_name, description, key_hash, key_prefix, ip_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
-      ).bind(agentId, input.display_name, input.description, keyHash, "amb_live_", ipHash, timestamp),
+      ).bind(agentId, input.display_name, input.description, keyHash, "amb_live_", originHash, timestamp),
       env.DB.prepare(
         "INSERT INTO audit_events (event_id, occurred_at, actor, action, target_type, target_id, request_id, outcome) VALUES (?, ?, 'public', 'register', 'agent', ?, ?, 'success')"
       ).bind(`evt_${crypto.randomUUID().replaceAll("-", "")}`, timestamp, agentId, requestId)
@@ -302,7 +303,7 @@ async function enforceReadQuota(request: Request, env: Env, requestId: string, t
 }
 
 export async function postMessage(request: Request, env: Env, requestId: string): Promise<Response> {
-  if (env.ENVIRONMENT === "production" && env.EMERGENCY_WRITES_PAUSED !== "false") {
+  if (env.EMERGENCY_WRITES_PAUSED !== "false") {
     return errorResponse(requestId, { status: 503, code: "writes_paused", message: "Posting is temporarily paused.", retryAfterSeconds: 900 });
   }
   if (!env.API_KEY_HMAC_SECRET || !env.IP_HASH_SECRET) {
@@ -390,8 +391,9 @@ export async function postMessage(request: Request, env: Env, requestId: string)
   };
 
   try {
+    const quotaSubject = await originQuotaHash(env.IP_HASH_SECRET, agent.ipHash, timestamp);
     await env.DB.batch([
-      ...messageQuotas(env.DB, agent.agentId, agent.ipHash, timestamp),
+      ...messageQuotas(env.DB, agent.agentId, quotaSubject, timestamp),
       env.DB.prepare(
         "INSERT INTO messages (message_id, agent_id, topic, message, reply_to, metadata_json, payload_hash, idempotency_key, received_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       ).bind(messageId, agent.agentId, topic, input.message, replyTo, metadataJson, hash, input.idempotency_key, timestamp, expiresAt),
@@ -400,9 +402,6 @@ export async function postMessage(request: Request, env: Env, requestId: string)
       ).bind(`evt_${crypto.randomUUID().replaceAll("-", "")}`, timestamp, agent.agentId, messageId, requestId)
     ]);
   } catch (error) {
-    if (isD1Error(error, "quota_exceeded")) {
-      return errorResponse(requestId, { status: 429, code: "rate_limited", message: "Posting limit reached.", retryAfterSeconds: 900 });
-    }
     if (isD1Error(error, "writes_paused")) {
       return errorResponse(requestId, { status: 503, code: "writes_paused", message: "Posting is temporarily paused.", retryAfterSeconds: 900 });
     }
@@ -414,6 +413,12 @@ export async function postMessage(request: Request, env: Env, requestId: string)
       return existing.payload_hash === hash
         ? messageResponse(existing, requestId)
         : errorResponse(requestId, { status: 409, code: "idempotency_conflict", message: "Idempotency key was already used with a different payload." });
+    }
+    if (isD1Error(error, "quota_exceeded")) {
+      return errorResponse(requestId, { status: 429, code: "rate_limited", message: "Posting limit reached.", retryAfterSeconds: 900 });
+    }
+    if (isD1Error(error, "parent_not_found")) {
+      return errorResponse(requestId, { status: 404, code: "parent_not_found", message: "Reply parent is unavailable." });
     }
     return errorResponse(requestId, { status: 503, code: "service_unavailable", message: "Posting is unavailable." });
   }

@@ -113,7 +113,7 @@ describe("digest delivery", () => {
       calls.push(request);
       throw new Error("network timeout after provider acceptance");
     });
-    await runDigest(testEnv, scheduledAt + 6 * 60 * 1000, successfulDelivery(calls));
+    await runDigest(testEnv, scheduledAt + 15 * 60 * 1000, successfulDelivery(calls));
     const firstKey = calls[0]!.headers.get("idempotency-key");
     const secondKey = calls[1]!.headers.get("idempotency-key");
     const batch = await env.DB.prepare("SELECT state, attempt_count FROM digest_batches").first<{ state: string; attempt_count: number }>();
@@ -178,5 +178,201 @@ describe("digest delivery", () => {
     expect(hidden.status).toBe(200);
     expect(membership?.count).toBe(0);
     expect(calls).toHaveLength(0);
+  });
+
+  it("spaces every retry by 15 minutes, including across interval and UTC day boundaries", async () => {
+    await insertMessage();
+    const start = Math.ceil(scheduledAt / 86_400_000) * 86_400_000 - 1;
+    const calls: Request[] = [];
+    const fail = async (request: Request) => { calls.push(request); return new Response(null, { status: 503 }); };
+    await runDigest(testEnv, start, fail);
+    await runDigest(testEnv, start + 1, fail);
+    await runDigest(testEnv, start + 899_999, fail);
+    expect(calls).toHaveLength(1);
+    await runDigest(testEnv, start + 900_000, fail);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("applies global spacing to a different batch after a successful send", async () => {
+    await insertMessage();
+    const calls: Request[] = [];
+    const start = Math.floor(scheduledAt / 900_000) * 900_000 + 899_999;
+    await runDigest(testEnv, start, successfulDelivery(calls));
+    await insertMessage("msg_second", "Second batch");
+    await Promise.all([
+      runDigest(testEnv, start + 1, successfulDelivery(calls)),
+      runDigest(testEnv, start + 1, successfulDelivery(calls))
+    ]);
+    expect(calls).toHaveLength(1);
+    await runDigest(testEnv, start + 900_000, successfulDelivery(calls));
+    expect(calls).toHaveLength(2);
+  });
+
+  it("retries byte-identical content after source, membership and origin changes", async () => {
+    await insertMessage();
+    const calls: Request[] = [];
+    await runDigest(testEnv, scheduledAt, async (request) => { calls.push(request); return new Response(null, { status: 503 }); });
+    await env.DB.batch([
+      env.DB.prepare("UPDATE messages SET message = 'changed', hidden_at = ?").bind(scheduledAt),
+      env.DB.prepare("UPDATE agents SET display_name = 'Changed Agent'"),
+      env.DB.prepare("DELETE FROM digest_messages")
+    ]);
+    await runDigest({ ...testEnv, PUBLIC_API_ORIGIN: "https://changed.example" }, scheduledAt + 900_000, successfulDelivery(calls));
+    expect(calls).toHaveLength(2);
+    expect(await calls[1]!.text()).toBe(await calls[0]!.text());
+    expect(calls[1]!.headers.get("idempotency-key")).toBe(calls[0]!.headers.get("idempotency-key"));
+  });
+
+  it("stops pending 5xx retries at exactly 24 hours", async () => {
+    await insertMessage();
+    await runDigest(testEnv, scheduledAt, async () => new Response(null, { status: 503 }));
+    const calls: Request[] = [];
+    await runDigest(testEnv, scheduledAt + 86_400_000, successfulDelivery(calls));
+    expect(calls).toHaveLength(0);
+    expect(await env.DB.prepare("SELECT state, attempt_count FROM digest_batches").first()).toMatchObject({ state: "needs_review", attempt_count: 1 });
+  });
+
+  it.each(["pending", "leased"])("bounds %s retries to five attempts", async (state) => {
+    await insertMessage();
+    const calls: Request[] = [];
+    for (let attempt = 0; attempt < 7; attempt += 1) {
+      await runDigest(testEnv, scheduledAt + attempt * 900_000, async (request) => {
+        calls.push(request);
+        if (state === "leased") throw new Error("ambiguous timeout");
+        return new Response(null, { status: 503 });
+      });
+    }
+    expect(calls).toHaveLength(5);
+    expect(await env.DB.prepare("SELECT state, attempt_count FROM digest_batches").first()).toMatchObject({ state: "needs_review", attempt_count: 5 });
+  });
+
+  it("leaves every unrepresented message in backlog and delivers it later", async () => {
+    for (let index = 0; index < 3; index += 1) await insertMessage(`msg_overflow${index}`, "x".repeat(10_000));
+    const calls: Request[] = [];
+    await runDigest(testEnv, scheduledAt, successfulDelivery(calls));
+    const body = await calls[0]!.clone().json() as { subject: string; text: string };
+    const membership = await env.DB.prepare("SELECT message_id FROM digest_messages").all<{ message_id: string }>();
+    expect(membership.results).toHaveLength(1);
+    expect(body.subject).toBe("Agent Message Board: 1 new post");
+    for (const member of membership.results) expect(body.text).toContain(`/api/messages/${member.message_id}`);
+    await runDigest(testEnv, scheduledAt + 900_000, successfulDelivery(calls));
+    await runDigest(testEnv, scheduledAt + 1_800_000, successfulDelivery(calls));
+    expect(calls).toHaveLength(3);
+    expect((await env.DB.prepare("SELECT COUNT(*) AS count FROM digest_messages").first<{ count: number }>())?.count).toBe(3);
+  });
+
+  it.each(["hide", "expire"])("revalidates %s before batch membership commits", async (change) => {
+    await insertMessage();
+    let changed = false;
+    const db = new Proxy(env.DB, { get(target, property) {
+      if (property === "batch") return async (statements: D1PreparedStatement[]) => {
+        if (!changed) {
+          changed = true;
+          await target.prepare(change === "hide" ? "UPDATE messages SET hidden_at = ?" : "UPDATE messages SET expires_at = ?").bind(scheduledAt).run();
+        }
+        return target.batch(statements);
+      };
+      const value = Reflect.get(target, property);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const calls: Request[] = [];
+    await runDigest({ ...testEnv, DB: db }, scheduledAt, successfulDelivery(calls));
+    expect(changed).toBe(true);
+    expect(calls).toHaveLength(0);
+    expect((await env.DB.prepare("SELECT COUNT(*) AS count FROM digest_messages").first<{ count: number }>())?.count).toBe(0);
+  });
+
+  it("rechecks pause atomically after the initial pause read", async () => {
+    await insertMessage();
+    let paused = false;
+    const db = new Proxy(env.DB, { get(target, property) {
+      if (property === "batch") return async (statements: D1PreparedStatement[]) => {
+        if (!paused) {
+          paused = true;
+          await target.prepare("UPDATE board_state SET value = 'true' WHERE state_key = 'email_paused'").run();
+        }
+        return target.batch(statements);
+      };
+      const value = Reflect.get(target, property);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const calls: Request[] = [];
+    await runDigest({ ...testEnv, DB: db }, scheduledAt, successfulDelivery(calls));
+    expect(paused).toBe(true);
+    expect(calls).toHaveLength(0);
+    expect((await env.DB.prepare("SELECT COALESCE(SUM(attempt_count), 0) AS count FROM digest_batches").first<{ count: number }>())?.count).toBe(0);
+  });
+
+  it("persists the exact request bytes and their hash on the first attempt", async () => {
+    await insertMessage();
+    const calls: Request[] = [];
+    await runDigest(testEnv, scheduledAt, successfulDelivery(calls));
+    const bytes = await calls[0]!.text();
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(bytes))),
+      (byte) => byte.toString(16).padStart(2, "0")).join("");
+    expect(await env.DB.prepare("SELECT payload_json, payload_hash FROM digest_batches").first())
+      .toEqual({ payload_json: bytes, payload_hash: hash });
+  });
+
+  it.each(["payload_json = NULL", "payload_hash = 'corrupted'", "payload_json = 'changed bytes'"])("does not retry an unverifiable stored payload: %s", async (mutation) => {
+    await insertMessage();
+    await runDigest(testEnv, scheduledAt, async () => new Response(null, { status: 503 }));
+    await env.DB.prepare(`UPDATE digest_batches SET ${mutation}`).run();
+    const before = await env.DB.prepare("SELECT payload_json, payload_hash FROM digest_batches").first();
+    const calls: Request[] = [];
+    await runDigest(testEnv, scheduledAt + 900_000, successfulDelivery(calls));
+    expect(calls).toHaveLength(0);
+    expect(await env.DB.prepare("SELECT state, attempt_count FROM digest_batches").first()).toEqual({ state: "needs_review", attempt_count: 1 });
+    expect(await env.DB.prepare("SELECT payload_json, payload_hash FROM digest_batches").first()).toEqual(before);
+  });
+
+  it.each(["hide", "expire", "pause"])("revalidates %s at the first lease after formatting", async (change) => {
+    await insertMessage();
+    let transactions = 0;
+    const db = new Proxy(env.DB, { get(target, property) {
+      if (property === "batch") return async (statements: D1PreparedStatement[]) => {
+        if (++transactions === 2) {
+          if (change === "pause") await target.prepare("UPDATE board_state SET value = 'true' WHERE state_key = 'email_paused'").run();
+          else await target.prepare(change === "hide" ? "UPDATE messages SET hidden_at = ?" : "UPDATE messages SET expires_at = ?").bind(scheduledAt).run();
+        }
+        return target.batch(statements);
+      };
+      const value = Reflect.get(target, property);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const calls: Request[] = [];
+    await runDigest({ ...testEnv, DB: db }, scheduledAt, successfulDelivery(calls));
+    expect(transactions).toBe(2);
+    expect(calls).toHaveLength(0);
+    expect(await env.DB.prepare("SELECT state, attempt_count, payload_json FROM digest_batches").first())
+      .toEqual({ state: "pending", attempt_count: 0, payload_json: null });
+  });
+
+  it.each([0, 89])("atomically reserves only one of two distinct batches with %i daily attempts used", async (used) => {
+    for (const id of ["one", "two"]) {
+      await insertMessage(`msg_${id}`);
+      await env.DB.batch([
+        env.DB.prepare("INSERT INTO digest_batches (batch_id, interval_start, state, payload_hash, created_at) VALUES (?, ?, 'pending', 'unleased', ?)")
+          .bind(`dgb_${id}`, id === "one" ? scheduledAt - 900_000 : scheduledAt, scheduledAt - 1),
+        env.DB.prepare("INSERT INTO digest_messages (batch_id, message_id) VALUES (?, ?)").bind(`dgb_${id}`, `msg_${id}`)
+      ]);
+    }
+    await env.DB.prepare("INSERT INTO quota_counters (scope, subject, window_start, used, limit_value) VALUES ('email-global-daily', 'global', ?, ?, 90)")
+      .bind(Math.floor(scheduledAt / 86_400_000) * 86_400, used).run();
+    const calls: Request[] = [];
+    // Give each scheduler a different already-observed candidate, retaining real
+    // D1 execution for the competing reservation transactions.
+    const forBatch = (id: string) => new Proxy(env.DB, { get(target, property) {
+      if (property === "prepare") return (query: string) => target.prepare(query.includes("FROM digest_batches b")
+        ? query.replace("FROM digest_batches b", `FROM (SELECT * FROM digest_batches WHERE batch_id = 'dgb_${id}') b`)
+        : query);
+      const value = Reflect.get(target, property);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    await Promise.all(["one", "two"].map((id) => runDigest({ ...testEnv, DB: forBatch(id) }, scheduledAt, successfulDelivery(calls))));
+    expect(calls).toHaveLength(1);
+    expect((await env.DB.prepare("SELECT SUM(attempt_count) AS count FROM digest_batches").first<{ count: number }>())?.count).toBe(1);
+    expect((await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'email-global-daily'").first<{ used: number }>())?.used).toBe(used + 1);
+    expect((await env.DB.prepare("SELECT COUNT(*) AS count FROM audit_events WHERE action = 'digest_attempt'").first<{ count: number }>())?.count).toBe(1);
   });
 });

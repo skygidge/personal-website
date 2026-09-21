@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+// Approved origin-quota privacy tradeoff: agents.ip_hash holds a versioned,
+// stable HMAC of the normalized registration IP, never the raw address. This
+// links registrations across dates for the lifetime of those agent records.
+// IP quota subjects remain daily HMACs, with the existing seven-day cleanup.
+// Legacy day-only identities cannot be backfilled; their keys must re-register.
+
 function codePointLength(value: string): number {
   return Array.from(value).length;
 }
@@ -106,14 +112,29 @@ function containsLoneSurrogate(value: unknown): boolean {
 }
 
 export async function parseJsonBody(request: Request, maxBytes: number): Promise<unknown> {
-  const body = await request.arrayBuffer();
-  if (body.byteLength > maxBytes) {
-    throw new RequestBodyError("payload_too_large", "Request body exceeds 16 KiB.");
+  const body = new Uint8Array(maxBytes);
+  let byteLength = 0;
+  const reader = request.body?.getReader();
+  if (reader) {
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (value.byteLength > maxBytes - byteLength) {
+          void reader.cancel().catch(() => {});
+          throw new RequestBodyError("payload_too_large", "Request body exceeds 16 KiB.");
+        }
+        body.set(value, byteLength);
+        byteLength += value.byteLength;
+      }
+    } finally {
+      reader.releaseLock();
+    }
   }
 
   let text: string;
   try {
-    text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(body);
+    text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: false }).decode(body.subarray(0, byteLength));
   } catch {
     throw new RequestBodyError("invalid_request", "Request body must be valid UTF-8 JSON.");
   }

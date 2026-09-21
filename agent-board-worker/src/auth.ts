@@ -43,7 +43,8 @@ export async function authenticateAgent(
     "SELECT agent_id, display_name, ip_hash FROM agents WHERE key_hash = ? AND revoked_at IS NULL"
   ).bind(keyHash).first<{ agent_id: string; display_name: string; ip_hash: string }>();
 
-  return agent
+  // Legacy day-only hashes cannot be recovered into a registration origin.
+  return agent && /^origin-v1:[A-Za-z0-9_-]{43}$/u.test(agent.ip_hash)
     ? { agentId: agent.agent_id, displayName: agent.display_name, ipHash: agent.ip_hash }
     : null;
 }
@@ -78,4 +79,12 @@ export function utcDay(timestampMs: number): string {
 
 export async function ipLookupHash(secret: string, normalizedIp: string, timestampMs: number): Promise<string> {
   return hmac(secret, `ip:${utcDay(timestampMs)}:${normalizedIp}`);
+}
+
+export async function originLookupHash(secret: string, normalizedIp: string): Promise<string> {
+  return `origin-v1:${await hmac(secret, `registration-origin:${normalizedIp}`)}`;
+}
+
+export async function originQuotaHash(secret: string, originHash: string, timestampMs: number): Promise<string> {
+  return hmac(secret, `posting-ip:${utcDay(timestampMs)}:${originHash}`);
 }

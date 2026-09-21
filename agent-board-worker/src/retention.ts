@@ -1,6 +1,8 @@
 import type { Env } from "./index";
 
 const MESSAGE_DELETE_BATCH = 100;
+const MAX_CLEANUP_BATCHES = 20;
+const CLEANUP_TIME_BUDGET_MS = 15_000;
 const IP_QUOTA_RETENTION_SECONDS = 7 * 24 * 60 * 60;
 const AUDIT_RETENTION_MILLISECONDS = 90 * 24 * 60 * 60 * 1000;
 const DEFAULT_STORAGE_LIMIT_BYTES = 500_000_000;
@@ -46,32 +48,49 @@ function audit(db: D1Database, now: number, action: string, outcome: string): D1
 }
 
 export async function runRetention(env: Env, now: number, measureStorage?: StorageMeasure): Promise<RetentionResult> {
+  let deletedMessages = 0;
+  const deadline = Date.now() + CLEANUP_TIME_BUDGET_MS;
   try {
-    const expired = await env.DB.prepare(
-      "SELECT message_id FROM messages WHERE expires_at <= ? ORDER BY expires_at ASC, message_id ASC LIMIT ?"
-    ).bind(now, MESSAGE_DELETE_BATCH).all<{ message_id: string }>();
-    const ids = expired.results.map((message) => message.message_id);
     const daySeconds = Math.floor(now / 1000 / (24 * 60 * 60)) * 24 * 60 * 60;
     const quotaCutoff = daySeconds - IP_QUOTA_RETENTION_SECONDS;
-    const statements: D1PreparedStatement[] = [
-      env.DB.prepare("DELETE FROM quota_counters WHERE scope LIKE '%-ip-%' AND window_start < ?").bind(quotaCutoff),
-      env.DB.prepare("DELETE FROM audit_events WHERE occurred_at < ?").bind(now - AUDIT_RETENTION_MILLISECONDS),
-      audit(env.DB, now, "retention", "success")
-    ];
-    if (ids.length) {
-      const placeholders = ids.map(() => "?").join(", ");
-      statements.unshift(
-        env.DB.prepare(`DELETE FROM digest_messages WHERE message_id IN (${placeholders})`).bind(...ids),
-        env.DB.prepare(`DELETE FROM messages WHERE message_id IN (${placeholders})`).bind(...ids)
-      );
+    for (let batch = 0; batch < MAX_CLEANUP_BATCHES && Date.now() < deadline; batch += 1) {
+      // Keep referenced parents until their replies expire; reads already hide them.
+      const expired = await env.DB.prepare(
+        `SELECT m.message_id FROM messages m WHERE m.expires_at <= ?
+         AND NOT EXISTS (SELECT 1 FROM messages r WHERE r.reply_to = m.message_id)
+         ORDER BY m.expires_at ASC, m.message_id ASC LIMIT ?`
+      ).bind(now, MESSAGE_DELETE_BATCH).all<{ message_id: string }>();
+      const ids = expired.results.map((message) => message.message_id);
+      const statements: D1PreparedStatement[] = [
+        env.DB.prepare(`DELETE FROM quota_counters WHERE rowid IN (
+          SELECT rowid FROM quota_counters WHERE scope LIKE '%-ip-%' AND window_start < ? LIMIT ?
+        )`).bind(quotaCutoff, MESSAGE_DELETE_BATCH),
+        env.DB.prepare(`DELETE FROM audit_events WHERE event_id IN (
+          SELECT event_id FROM audit_events WHERE occurred_at < ? ORDER BY occurred_at LIMIT ?
+        )`).bind(now - AUDIT_RETENTION_MILLISECONDS, MESSAGE_DELETE_BATCH)
+      ];
+      if (ids.length) {
+        const placeholders = ids.map(() => "?").join(", ");
+        statements.push(
+          env.DB.prepare(`DELETE FROM digest_messages WHERE message_id IN (${placeholders})`).bind(...ids),
+          env.DB.prepare(`DELETE FROM messages WHERE message_id IN (${placeholders})`).bind(...ids)
+        );
+      }
+      const results = await env.DB.batch(statements);
+      deletedMessages += ids.length ? results.at(-1)!.meta.changes : 0;
+      if (!ids.length && results[0]!.meta.changes === 0 && results[1]!.meta.changes === 0) break;
     }
-    const cleanupResults = await env.DB.batch(statements);
+    await audit(env.DB, now, "retention", "success").run();
+  } catch {
+    // Cleanup failure must not skip the existing capacity pause check.
+  }
 
+  try {
     const bytes = measureStorage
       ? await measureStorage()
-      : cleanupResults.at(-1)?.meta.size_after;
-    if (!Number.isSafeInteger(bytes) || bytes < 0) {
-      return { deleted_messages: ids.length, capacity_state: "unavailable" };
+      : (await env.DB.prepare("SELECT state_key FROM board_state LIMIT 1").all()).meta.size_after;
+    if (typeof bytes !== "number" || !Number.isSafeInteger(bytes) || bytes < 0) {
+      return { deleted_messages: deletedMessages, capacity_state: "unavailable" };
     }
 
     const capacityState = thresholdState(bytes, storageLimit(env));
@@ -84,8 +103,8 @@ export async function runRetention(env: Env, now: number, measureStorage?: Stora
         audit(env.DB, now, "capacity_pause", "threshold_reached")
       ] : [])
     ]);
-    return { deleted_messages: ids.length, capacity_state: capacityState };
+    return { deleted_messages: deletedMessages, capacity_state: capacityState };
   } catch {
-    return { deleted_messages: 0, capacity_state: "unavailable" };
+    return { deleted_messages: deletedMessages, capacity_state: "unavailable" };
   }
 }

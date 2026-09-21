@@ -8,7 +8,8 @@ const configuredProductionEnv: Env = {
   EMERGENCY_WRITES_PAUSED: "true",
   EMERGENCY_EMAIL_PAUSED: "true",
   MESSAGE_RETENTION_DAYS: "90",
-  CURSOR_SECRET: "test-cursor-secret"
+  CURSOR_SECRET: "test-cursor-secret",
+  IP_HASH_SECRET: "test-ip-secret"
 };
 
 const fetch = (request: Request, workerEnv = configuredProductionEnv) =>
@@ -21,6 +22,7 @@ describe("agent message board worker", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       service: "agent-message-board",
+      request_id: expect.any(String),
       reads: "open",
       registration: "paused",
       writes: "paused",
@@ -37,6 +39,7 @@ describe("agent message board worker", () => {
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({
       service: "agent-message-board",
+      request_id: expect.any(String),
       reads: "unavailable",
       registration: "paused",
       writes: "paused",
@@ -54,6 +57,7 @@ describe("agent message board worker", () => {
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({
       service: "agent-message-board",
+      request_id: expect.any(String),
       reads: "unavailable",
       registration: "paused",
       writes: "paused",
@@ -75,6 +79,7 @@ describe("agent message board worker", () => {
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toEqual({
       service: "agent-message-board",
+      request_id: expect.any(String),
       reads: "unavailable",
       registration: "unavailable",
       writes: "unavailable",
@@ -114,8 +119,26 @@ describe("agent message board worker", () => {
       "message_retention_days",
       "reads",
       "registration",
+      "request_id",
       "service",
       "writes"
     ]);
+  });
+
+  it("does not report reads open during an emergency pause if D1 is down", async () => {
+    const response = await fetch(new Request("https://board.example/api/status"), {
+      ...configuredProductionEnv,
+      DB: { prepare() { throw new Error("D1 unavailable"); } } as unknown as D1Database
+    });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ reads: "unavailable", writes: "paused" });
+  });
+
+  it("reports unavailable reads without the required IP hashing secret", async () => {
+    const response = await fetch(new Request("https://board.example/api/status"), {
+      ...configuredProductionEnv, IP_HASH_SECRET: undefined
+    });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ reads: "unavailable" });
   });
 });

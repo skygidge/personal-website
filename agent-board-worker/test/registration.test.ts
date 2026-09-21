@@ -1,5 +1,6 @@
 import worker, { type Env } from "../src/index";
 import { authenticateAgent } from "../src/auth";
+import { parseJsonBody } from "../src/contracts";
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -18,7 +19,7 @@ async function resetBoard(): Promise<void> {
     env.DB.prepare("DELETE FROM audit_events"),
     env.DB.prepare("DELETE FROM agents"),
     env.DB.prepare("DELETE FROM quota_counters"),
-    env.DB.prepare("UPDATE board_state SET value = 'false' WHERE state_key = 'writes_paused'")
+    env.DB.prepare("INSERT OR REPLACE INTO board_state (state_key, value, updated_at) VALUES ('writes_paused', 'false', 0), ('capacity_paused', 'false', 0)")
   ]);
 }
 
@@ -35,6 +36,71 @@ function registrationRequest(body: unknown, address = "203.0.113.8"): Request {
 
 describe("agent registration", () => {
   beforeEach(resetBoard);
+
+  it.each(["writes_paused", "capacity_paused"])("fails closed when the %s control is missing", async (stateKey) => {
+    await env.DB.prepare("DELETE FROM board_state WHERE state_key = ?").bind(stateKey).run();
+    const response = await worker.fetch(registrationRequest({ display_name: "Missing control", description: "" }), testEnv, {} as ExecutionContext);
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({ error: { code: "writes_paused" } });
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM agents").first("count")).toBe(0);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM quota_counters").first("count")).toBe(0);
+  });
+
+  it.each(["writes_paused", "capacity_paused"])("guards agent inserts transactionally when %s disappears", async (stateKey) => {
+    await env.DB.prepare("DELETE FROM board_state WHERE state_key = ?").bind(stateKey).run();
+    await expect(env.DB.batch([
+      env.DB.prepare("INSERT INTO quota_counters VALUES ('registration-global-daily', 'global', 0, 1, 50)"),
+      env.DB.prepare("INSERT INTO agents (agent_id, display_name, key_hash, key_prefix, ip_hash, created_at) VALUES ('agt_guard', 'Guard', 'keyhash', 'amb_live_', 'origin', 1)")
+    ])).rejects.toThrow("writes_paused");
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM quota_counters").first("count")).toBe(0);
+  });
+
+  it.each([undefined, "true", "invalid"])("requires an explicit open emergency control (%s)", async (flag) => {
+    const response = await worker.fetch(registrationRequest({ display_name: "Closed", description: "" }), {
+      ...testEnv, EMERGENCY_WRITES_PAUSED: flag
+    }, {} as ExecutionContext);
+    expect(response.status).toBe(503);
+  });
+
+  it("rejects legacy registration-day identities that cannot enforce origin quotas", async () => {
+    const response = await worker.fetch(registrationRequest({ display_name: "Legacy", description: "" }), testEnv, {} as ExecutionContext);
+    const issued = await response.json() as { agent_id: string; api_key: string };
+    await env.DB.prepare("UPDATE agents SET ip_hash = 'legacy-day-only-hash' WHERE agent_id = ?").bind(issued.agent_id).run();
+    await expect(authenticateAgent(env.DB, testEnv.API_KEY_HMAC_SECRET!, issued.api_key)).resolves.toBeNull();
+  });
+
+  it.each([null, "1"])("cancels oversized registration streams without trusting Content-Length %s", async (length) => {
+    let chunks = 0;
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        chunks += 1;
+        controller.enqueue(new Uint8Array(1024).fill(32));
+        if (chunks === 100) controller.close();
+      },
+      cancel() { cancelled = true; }
+    });
+    const request = new Request("https://board.example/api/register", {
+      method: "POST",
+      headers: { "cf-connecting-ip": "203.0.113.8", ...(length ? { "content-length": length } : {}) },
+      body
+    });
+    const response = await worker.fetch(request, testEnv, {} as ExecutionContext);
+    expect(response.status).toBe(413);
+    expect(cancelled).toBe(true);
+    expect(chunks).toBeLessThanOrEqual(18);
+  });
+
+  it("accepts exactly 16 KiB and decodes UTF-8 split across stream chunks", async () => {
+    const bytes = new TextEncoder().encode(JSON.stringify("\u00e9") + " ".repeat(16380));
+    expect(bytes.byteLength).toBe(16384);
+    const body = new ReadableStream<Uint8Array>({ start(controller) {
+      controller.enqueue(bytes.slice(0, 2));
+      controller.enqueue(bytes.slice(2));
+      controller.close();
+    } });
+    await expect(parseJsonBody(new Request("https://board.example", { method: "POST", body }), 16384)).resolves.toBe("\u00e9");
+  });
 
   it("creates a unique one-time key for a valid registration", async () => {
     const response = await worker.fetch(registrationRequest({

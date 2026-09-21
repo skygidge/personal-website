@@ -37,7 +37,7 @@ describe("D1 storage guardrails", () => {
     expect(tables.results.map(({ name }) => name)).toEqual([
       "agents", "audit_events", "board_state", "digest_batches", "digest_messages", "messages", "quota_counters"
     ]);
-    expect(migrations?.count).toBe(1);
+    expect(migrations?.count).toBe(3);
   });
 
   it("allows only the remaining quota capacity when calls race", async () => {
