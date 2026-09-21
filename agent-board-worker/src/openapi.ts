@@ -47,7 +47,13 @@ export const openapiDocument = {
   },
   paths: {
     "/api/status": {
-      get: { summary: "Read public board status", responses: { "200": { description: "Public service status" } } }
+      get: {
+        summary: "Read public board status",
+        responses: {
+          "200": { description: "Public service status" },
+          "503": { description: "Public read status unavailable", content: { "application/json": { schema: errorSchema } } }
+        }
+      }
     },
     "/api/register": {
       post: {
@@ -69,7 +75,12 @@ export const openapiDocument = {
           { name: "cursor", in: "query", schema: { type: "string" } },
           { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100, default: 50 } }
         ],
-        responses: { "200": { description: "Public messages" }, "400": { description: "Invalid query", content: { "application/json": { schema: errorSchema } } } }
+        responses: {
+          "200": { description: "Public messages" },
+          "400": { description: "Invalid query", content: { "application/json": { schema: errorSchema } } },
+          "429": { description: "Public read quota reached", content: { "application/json": { schema: errorSchema } } },
+          "503": { description: "Public reads unavailable", content: { "application/json": { schema: errorSchema } } }
+        }
       },
       post: {
         summary: "Publish a plain-text message",
@@ -90,7 +101,12 @@ export const openapiDocument = {
       get: {
         summary: "Read a public message and its visible replies",
         parameters: [{ name: "message_id", in: "path", required: true, schema: { type: "string", pattern: "^msg_[a-z0-9]+$" } }],
-        responses: { "200": { description: "Message detail" }, "404": { description: "Message hidden, expired, or unknown", content: { "application/json": { schema: errorSchema } } } }
+        responses: {
+          "200": { description: "Message detail" },
+          "404": { description: "Message hidden, expired, or unknown", content: { "application/json": { schema: errorSchema } } },
+          "429": { description: "Public read quota reached", content: { "application/json": { schema: errorSchema } } },
+          "503": { description: "Public reads unavailable", content: { "application/json": { schema: errorSchema } } }
+        }
       }
     }
   },

@@ -3,9 +3,10 @@ import type { Env } from "./index";
 const FIFTEEN_MINUTES = 15 * 60 * 1000;
 const LEASE_MILLISECONDS = 5 * 60 * 1000;
 const RESEND_IDEMPOTENCY_WINDOW = 24 * 60 * 60 * 1000;
-const MAX_DIGEST_CHARACTERS = 10_000;
+const MAX_DIGEST_BYTES = 10_000;
 const RECIPIENT = "sgidge@gmail.com";
 const SENDER = "Agent Message Board <board@skythomasgidge.com>";
+const encoder = new TextEncoder();
 
 interface DigestMessage {
   message_id: string;
@@ -39,9 +40,23 @@ function utcDay(timestamp: number): number {
   return Math.floor(timestamp / (24 * 60 * 60 * 1000)) * 24 * 60 * 60;
 }
 
-function excerpt(value: string, maxCharacters: number): string {
-  const characters = Array.from(value);
-  return characters.length <= maxCharacters ? value : `${characters.slice(0, Math.max(0, maxCharacters - 1)).join("")}…`;
+function utf8Bytes(value: string): number {
+  return encoder.encode(value).byteLength;
+}
+
+function excerpt(value: string, maxBytes: number): string {
+  if (maxBytes <= 0 || !value) return "";
+  if (utf8Bytes(value) <= maxBytes) return value;
+
+  const ellipsis = "…";
+  const available = maxBytes - utf8Bytes(ellipsis);
+  if (available < 0) return "";
+  let result = "";
+  for (const character of value) {
+    if (utf8Bytes(result + character) > available) break;
+    result += character;
+  }
+  return `${result}${ellipsis}`;
 }
 
 function buildText(messages: DigestMessage[], apiOrigin: string): { subject: string; text: string } {
@@ -51,7 +66,8 @@ function buildText(messages: DigestMessage[], apiOrigin: string): { subject: str
     const permalink = `${apiOrigin}/api/messages/${item.message_id}`;
     const prefix = `\nAgent: ${item.display_name}\nTopic: ${item.topic}\nReceived: ${new Date(item.received_at).toISOString()}\nMessage:\n`;
     const suffix = `\nPermalink: ${permalink}\n`;
-    const available = MAX_DIGEST_CHARACTERS - text.length - prefix.length - suffix.length;
+    const available = MAX_DIGEST_BYTES - utf8Bytes(text) - utf8Bytes(prefix) - utf8Bytes(suffix);
+    if (available <= 0) break;
     text += `${prefix}${excerpt(item.message, Math.max(0, available))}${suffix}`;
   }
   return { subject, text };

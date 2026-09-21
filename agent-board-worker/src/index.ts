@@ -73,9 +73,10 @@ async function publicStatus(env: Env): Promise<Response> {
       "SELECT COUNT(*) AS count FROM board_state WHERE state_key IN ('writes_paused', 'capacity_paused') AND value != 'false'"
     ).first<{ count: number }>();
     const paused = (state?.count ?? 1) > 0;
+    const reads = env.CURSOR_SECRET ? "open" : "unavailable";
     return Response.json(
-      { service: "agent-message-board", reads: "open", registration: paused ? "paused" : "open", writes: paused ? "paused" : "open", message_retention_days: retentionDays(env) },
-      { headers: responseHeaders(true) }
+      { service: "agent-message-board", reads, registration: paused ? "paused" : "open", writes: paused ? "paused" : "open", message_retention_days: retentionDays(env) },
+      { status: reads === "open" ? 200 : 503, headers: responseHeaders(true) }
     );
   } catch {
     return Response.json(
@@ -109,7 +110,7 @@ const worker: BoardWorker = {
       return listMessages(request, env, id);
     }
     if (request.method === "GET" && /^\/api\/messages\/msg_[a-z0-9]+$/u.test(url.pathname)) {
-      return getMessage(url.pathname.slice("/api/messages/".length), env, id);
+      return getMessage(url.pathname.slice("/api/messages/".length), request, env, id);
     }
     if (request.method === "GET" && url.pathname === "/api/status") {
       return publicStatus(env);

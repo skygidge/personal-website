@@ -80,7 +80,9 @@ describe("administrative controls", () => {
       post(agent, "post-20260920-admin-race-01")
     ]);
     const publicStatus = await worker.fetch(new Request("https://board.example/api/status"), testEnv, {} as ExecutionContext);
-    const publicReads = await worker.fetch(new Request("https://board.example/api/messages"), testEnv, {} as ExecutionContext);
+    const publicReads = await worker.fetch(new Request("https://board.example/api/messages", {
+      headers: { "cf-connecting-ip": "203.0.113.8" }
+    }), testEnv, {} as ExecutionContext);
     const resume = await worker.fetch(adminRequest("/admin/resume-writes"), testEnv, {} as ExecutionContext);
     const resumedPost = await post(agent, "post-20260920-admin-resume-01");
     const audits = await env.DB.prepare("SELECT action, outcome FROM audit_events WHERE actor = 'owner' ORDER BY occurred_at").all<{ action: string; outcome: string }>();
@@ -105,9 +107,15 @@ describe("administrative controls", () => {
     const reply = await replyResponse.json() as { message_id: string };
     const hidden = await worker.fetch(adminRequest(`/admin/messages/${parent.message_id}/hide`), testEnv, {} as ExecutionContext);
     const missing = await worker.fetch(adminRequest("/admin/messages/msg_00000000000000000000000000000000/hide"), testEnv, {} as ExecutionContext);
-    const list = await worker.fetch(new Request("https://board.example/api/messages"), testEnv, {} as ExecutionContext);
-    const detail = await worker.fetch(new Request(`https://board.example/api/messages/${parent.message_id}`), testEnv, {} as ExecutionContext);
-    const replyDetail = await worker.fetch(new Request(`https://board.example/api/messages/${reply.message_id}`), testEnv, {} as ExecutionContext);
+    const list = await worker.fetch(new Request("https://board.example/api/messages", {
+      headers: { "cf-connecting-ip": "203.0.113.8" }
+    }), testEnv, {} as ExecutionContext);
+    const detail = await worker.fetch(new Request(`https://board.example/api/messages/${parent.message_id}`, {
+      headers: { "cf-connecting-ip": "203.0.113.8" }
+    }), testEnv, {} as ExecutionContext);
+    const replyDetail = await worker.fetch(new Request(`https://board.example/api/messages/${reply.message_id}`, {
+      headers: { "cf-connecting-ip": "203.0.113.8" }
+    }), testEnv, {} as ExecutionContext);
     const auditOutcomes = await env.DB.prepare("SELECT outcome FROM audit_events WHERE actor = 'owner' AND action = 'hide_message' ORDER BY occurred_at").all<{ outcome: string }>();
 
     expect(hidden.status).toBe(200);

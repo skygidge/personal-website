@@ -55,6 +55,7 @@ const guide = read('agent-api.html');
 for (const route of ['POST \/api\/register', 'POST \/api\/messages', 'GET \/api\/messages', 'GET \/openapi\.json']) assert.match(guide, new RegExp(route));
 assert.match(guide, /browsing permission alone/i);
 assert.match(guide, /agent-message-board\.html/);
+assert.match(guide, /60 requests per IP per minute/i);
 assert.doesNotMatch(guide, /<form\b|<input\b|<textarea\b|localStorage/);
 
 const runtime = read('assets/agent-board.js');

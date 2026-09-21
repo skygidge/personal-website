@@ -46,6 +46,12 @@ function messageRequest(apiKey: string, body: unknown): Request {
   });
 }
 
+function publicRead(path: string): Request {
+  return new Request(`https://board.example${path}`, {
+    headers: { "cf-connecting-ip": "203.0.113.8" }
+  });
+}
+
 async function publish(agent: { apiKey: string }, body: Record<string, unknown>): Promise<Record<string, unknown>> {
   const response = await worker.fetch(messageRequest(agent.apiKey, {
     topic: "introductions",
@@ -86,7 +92,7 @@ describe("agent conversations", () => {
   it("lists public messages through a no-store read API", async () => {
     const agent = await createAgent();
     const created = await publish(agent, {});
-    const response = await worker.fetch(new Request("https://board.example/api/messages?limit=1"), testEnv, {} as ExecutionContext);
+    const response = await worker.fetch(publicRead("/api/messages?limit=1"), testEnv, {} as ExecutionContext);
 
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
@@ -101,7 +107,7 @@ describe("agent conversations", () => {
   it("returns a public permalink without exposing hidden implementation fields", async () => {
     const agent = await createAgent();
     const created = await publish(agent, {});
-    const response = await worker.fetch(new Request(`https://board.example/api/messages/${created.message_id}`), testEnv, {} as ExecutionContext);
+    const response = await worker.fetch(publicRead(`/api/messages/${created.message_id}`), testEnv, {} as ExecutionContext);
 
     expect(response.status).toBe(200);
     const body = await response.json() as { message: Record<string, unknown>; replies: unknown[]; request_id: string };
@@ -215,14 +221,14 @@ describe("agent conversations", () => {
       .bind(1_790_000_000_000, firstCreated.message_id, secondCreated.message_id)
       .run();
 
-    const first = await worker.fetch(new Request("https://board.example/api/messages?topic=research&limit=1"), testEnv, {} as ExecutionContext);
+    const first = await worker.fetch(publicRead("/api/messages?topic=research&limit=1"), testEnv, {} as ExecutionContext);
     const firstBody = await first.json() as { messages: Array<{ message_id: string; topic: string }>; next_cursor: string };
     await env.DB.prepare("UPDATE messages SET hidden_at = 1, hidden_reason = 'test' WHERE message_id = ?")
       .bind(firstBody.messages[0]?.message_id)
       .run();
-    const second = await worker.fetch(new Request(`https://board.example/api/messages?topic=research&limit=1&cursor=${encodeURIComponent(firstBody.next_cursor)}`), testEnv, {} as ExecutionContext);
+    const second = await worker.fetch(publicRead(`/api/messages?topic=research&limit=1&cursor=${encodeURIComponent(firstBody.next_cursor)}`), testEnv, {} as ExecutionContext);
     const secondBody = await second.json() as { messages: Array<{ message_id: string; topic: string }>; next_cursor: string | null };
-    const invalid = await worker.fetch(new Request("https://board.example/api/messages?topic=research&cursor=not-a-signed-cursor"), testEnv, {} as ExecutionContext);
+    const invalid = await worker.fetch(publicRead("/api/messages?topic=research&cursor=not-a-signed-cursor"), testEnv, {} as ExecutionContext);
 
     expect(first.status).toBe(200);
     expect(firstBody.messages).toHaveLength(1);
@@ -248,8 +254,8 @@ describe("agent conversations", () => {
     });
     await env.DB.prepare("UPDATE messages SET hidden_at = 1, hidden_reason = 'test' WHERE message_id = ?").bind(parent.message_id).run();
 
-    const parentResponse = await worker.fetch(new Request(`https://board.example/api/messages/${parent.message_id}`), testEnv, {} as ExecutionContext);
-    const replyResponse = await worker.fetch(new Request(`https://board.example/api/messages/${reply.message_id}`), testEnv, {} as ExecutionContext);
+    const parentResponse = await worker.fetch(publicRead(`/api/messages/${parent.message_id}`), testEnv, {} as ExecutionContext);
+    const replyResponse = await worker.fetch(publicRead(`/api/messages/${reply.message_id}`), testEnv, {} as ExecutionContext);
     const replyBody = await replyResponse.json() as { message: { parent_unavailable: boolean; message: string } };
 
     expect(parentResponse.status).toBe(404);
@@ -260,7 +266,13 @@ describe("agent conversations", () => {
 
   it("publishes an OpenAPI document with explicit POST write routes", async () => {
     const response = await worker.fetch(new Request("https://board.example/openapi.json"), testEnv, {} as ExecutionContext);
-    const document = await response.json() as { openapi: string; paths: Record<string, Record<string, unknown>> };
+    const document = await response.json() as {
+      openapi: string;
+      paths: Record<string, {
+        get?: { responses?: Record<string, unknown> };
+        post?: { responses?: Record<string, unknown> };
+      }>;
+    };
 
     expect(response.status).toBe(200);
     expect(response.headers.get("access-control-allow-origin")).toBe("*");
@@ -269,6 +281,14 @@ describe("agent conversations", () => {
     expect(document.paths["/api/messages"]?.post).toBeTruthy();
     expect(document.paths["/api/messages"]?.get).toBeTruthy();
     expect(document.paths["/api/messages/{message_id}"]?.get).toBeTruthy();
+    expect(document.paths["/api/messages"]?.get?.responses).toMatchObject({
+      "429": expect.anything(),
+      "503": expect.anything()
+    });
+    expect(document.paths["/api/messages/{message_id}"]?.get?.responses).toMatchObject({
+      "429": expect.anything(),
+      "503": expect.anything()
+    });
   });
 
   it("accepts bounded metadata nesting but rejects deeper structures", async () => {
@@ -384,12 +404,33 @@ describe("agent conversations", () => {
   });
 
   it("keeps GET requests side-effect free and rejects invalid read queries", async () => {
-    const read = await worker.fetch(new Request("https://board.example/api/messages?limit=101"), testEnv, {} as ExecutionContext);
+    const read = await worker.fetch(publicRead("/api/messages?limit=101"), testEnv, {} as ExecutionContext);
     const count = await env.DB.prepare("SELECT COUNT(*) AS count FROM messages").first<{ count: number }>();
 
     expect(read.status).toBe(400);
     expect(count?.count).toBe(0);
     await expect(read.json()).resolves.toMatchObject({ error: { code: "invalid_request" } });
+  });
+
+  it("limits public reads to 60 requests per IP each minute", async () => {
+    const responses = await Promise.all(Array.from({ length: 61 }, () =>
+      worker.fetch(publicRead("/api/messages"), testEnv, {} as ExecutionContext)
+    ));
+
+    expect(responses.slice(0, 60).every((response) => response.status === 200)).toBe(true);
+    expect(responses[60]?.status).toBe(429);
+    await expect(responses[60]?.json()).resolves.toMatchObject({ error: { code: "rate_limited" } });
+  });
+
+  it("applies the public read limit to message permalinks", async () => {
+    const agent = await createAgent();
+    const created = await publish(agent, {});
+    const responses = await Promise.all(Array.from({ length: 61 }, () =>
+      worker.fetch(publicRead(`/api/messages/${created.message_id}`), testEnv, {} as ExecutionContext)
+    ));
+
+    expect(responses.slice(0, 60).every((response) => response.status === 200)).toBe(true);
+    expect(responses[60]?.status).toBe(429);
   });
 
 });

@@ -32,10 +32,11 @@ async function resetBoard(): Promise<void> {
 }
 
 async function insertMessage(messageId = "msg_digest00000000000000000000000001", text = "A board message for the digest."): Promise<void> {
+  const agentId = `agt_${messageId.slice(4)}`;
   await env.DB.batch([
-    env.DB.prepare("INSERT INTO agents (agent_id, display_name, description, key_hash, key_prefix, ip_hash, created_at) VALUES ('agt_digest', 'Digest Agent', '', 'digest-key', 'amb_live_', 'digest-ip', ?)").bind(scheduledAt - 1),
-    env.DB.prepare("INSERT INTO messages (message_id, agent_id, topic, message, metadata_json, payload_hash, idempotency_key, received_at, expires_at) VALUES (?, 'agt_digest', 'research', ?, '{}', 'payload', ?, ?, ?)")
-      .bind(messageId, text, `post-${messageId}`, scheduledAt - 1, scheduledAt + 90 * 24 * 60 * 60 * 1000)
+    env.DB.prepare("INSERT INTO agents (agent_id, display_name, description, key_hash, key_prefix, ip_hash, created_at) VALUES (?, 'Digest Agent', '', ?, 'amb_live_', 'digest-ip', ?)").bind(agentId, `digest-key-${messageId}`, scheduledAt - 1),
+    env.DB.prepare("INSERT INTO messages (message_id, agent_id, topic, message, metadata_json, payload_hash, idempotency_key, received_at, expires_at) VALUES (?, ?, 'research', ?, '{}', 'payload', ?, ?, ?)")
+      .bind(messageId, agentId, text, `post-${messageId}`, scheduledAt - 1, scheduledAt + 90 * 24 * 60 * 60 * 1000)
   ]);
 }
 
@@ -79,6 +80,19 @@ describe("digest delivery", () => {
     expect(body.text).toContain("https://board.example/api/messages/msg_digest00000000000000000000000001");
     expect(batch).toMatchObject({ state: "sent", provider_message_id: "email_123", payload_hash: expect.any(String) });
     expect(membership.results).toEqual([{ message_id: "msg_digest00000000000000000000000001" }]);
+  });
+
+  it("keeps a busy interval within the fixed digest text ceiling", async () => {
+    await insertMessage("msg_digest00000000000000000000000011", "😀".repeat(5_000));
+    await insertMessage("msg_digest00000000000000000000000012", "😀".repeat(5_000));
+    await insertMessage("msg_digest00000000000000000000000013", "😀".repeat(5_000));
+    const calls: Request[] = [];
+
+    await runDigest(testEnv, scheduledAt, successfulDelivery(calls));
+
+    const body = await calls[0]?.json() as { text: string };
+    expect(calls).toHaveLength(1);
+    expect(new TextEncoder().encode(body.text).byteLength).toBeLessThanOrEqual(10_000);
   });
 
   it("does not begin a new send while normal email pause or the emergency flag is active", async () => {

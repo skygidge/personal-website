@@ -44,6 +44,23 @@ describe("agent message board worker", () => {
     });
   });
 
+  it("keeps reads unavailable after the emergency write flag is lifted without cursor signing", async () => {
+    const response = await fetch(new Request("https://board.example/api/status"), {
+      ...configuredProductionEnv,
+      EMERGENCY_WRITES_PAUSED: "false",
+      CURSOR_SECRET: undefined
+    });
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      service: "agent-message-board",
+      reads: "unavailable",
+      registration: "paused",
+      writes: "paused",
+      message_retention_days: 90
+    });
+  });
+
   it("reports reads as unavailable when board state cannot be read", async () => {
     const response = await fetch(new Request("https://board.example/api/status"), {
       ...configuredProductionEnv,

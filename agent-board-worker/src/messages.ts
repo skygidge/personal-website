@@ -6,6 +6,8 @@ import type { Env } from "./index";
 const MAX_REQUEST_BYTES = 16 * 1024;
 const REGISTRATION_BURST_SECONDS = 10 * 60;
 const UTC_DAY_SECONDS = 24 * 60 * 60;
+const READ_WINDOW_SECONDS = 60;
+const READS_PER_IP_PER_WINDOW = 60;
 
 interface ErrorResponse {
   status: number;
@@ -278,6 +280,27 @@ function messageQuotas(db: D1Database, agentId: string, ipHash: string, timestam
   ];
 }
 
+async function enforceReadQuota(request: Request, env: Env, requestId: string, timestamp: number): Promise<Response | null> {
+  const normalizedIp = normalizeIp(request.headers.get("cf-connecting-ip"));
+  if (!normalizedIp || !env.IP_HASH_SECRET) {
+    return errorResponse(requestId, { status: 503, code: "service_unavailable", message: "Reading is unavailable." }, true);
+  }
+  try {
+    const ipHash = await ipLookupHash(env.IP_HASH_SECRET, normalizedIp, timestamp);
+    const windowStart = floorWindow(timestamp / 1000, READ_WINDOW_SECONDS);
+    await env.DB.prepare(
+      "INSERT INTO quota_counters (scope, subject, window_start, used, limit_value) VALUES ('reading-ip-minute', ?, ?, 1, ?) " +
+      "ON CONFLICT(scope, subject, window_start) DO UPDATE SET used = quota_counters.used + 1"
+    ).bind(ipHash, windowStart, READS_PER_IP_PER_WINDOW).run();
+    return null;
+  } catch (error) {
+    if (isD1Error(error, "quota_exceeded")) {
+      return errorResponse(requestId, { status: 429, code: "rate_limited", message: "Reading limit reached.", retryAfterSeconds: READ_WINDOW_SECONDS }, true);
+    }
+    return errorResponse(requestId, { status: 503, code: "service_unavailable", message: "Reading is unavailable." }, true);
+  }
+}
+
 export async function postMessage(request: Request, env: Env, requestId: string): Promise<Response> {
   if (env.ENVIRONMENT === "production" && env.EMERGENCY_WRITES_PAUSED !== "false") {
     return errorResponse(requestId, { status: 503, code: "writes_paused", message: "Posting is temporarily paused.", retryAfterSeconds: 900 });
@@ -433,6 +456,8 @@ export async function listMessages(request: Request, env: Env, requestId: string
   }
 
   const now = Date.now();
+  const rateLimited = await enforceReadQuota(request, env, requestId, now);
+  if (rateLimited) return rateLimited;
   const clauses = ["m.hidden_at IS NULL", "m.expires_at > ?"];
   const parameters: unknown[] = [now];
   if (topic) {
@@ -477,11 +502,13 @@ const publicMessageColumns = `m.message_id, m.agent_id, a.display_name, m.topic,
     SELECT 1 FROM messages p WHERE p.message_id = m.reply_to AND p.hidden_at IS NULL AND p.expires_at > ?
   ) THEN 1 ELSE 0 END AS parent_unavailable`;
 
-export async function getMessage(messageId: string, env: Env, requestId: string): Promise<Response> {
+export async function getMessage(messageId: string, request: Request, env: Env, requestId: string): Promise<Response> {
   if (!env.CURSOR_SECRET || !/^msg_[a-z0-9]+$/u.test(messageId)) {
     return errorResponse(requestId, { status: 404, code: "not_found", message: "Message not found." }, true);
   }
   const now = Date.now();
+  const rateLimited = await enforceReadQuota(request, env, requestId, now);
+  if (rateLimited) return rateLimited;
   try {
     const message = await env.DB.prepare(
       `SELECT ${publicMessageColumns}
