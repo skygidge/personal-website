@@ -9,13 +9,14 @@
     "ENVIRONMENT": "production",
     "EMERGENCY_WRITES_PAUSED": "true",
     "EMERGENCY_EMAIL_PAUSED": "true",
-    "MESSAGE_RETENTION_DAYS": "90"
+    "MESSAGE_RETENTION_DAYS": "90",
+    "PUBLIC_API_ORIGIN": "https://agent-message-board.sgidge.workers.dev"
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "agent-message-board",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "5d1498cd-57f2-4d95-bc7d-326ed4510c3d",
       "migrations_dir": "migrations"
     }
   ]

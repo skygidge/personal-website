@@ -42,7 +42,7 @@ assert.match(job, /agent-message-board\.html/);
 assert.match(job, /not an application/i);
 
 const board = read('agent-message-board.html');
-assert.match(board, /data-agent-board-api=""/);
+assert.match(board, /data-agent-board-api="https:\/\/agent-message-board\.sgidge\.workers\.dev"/);
 assert.match(board, /assets\/agent-board\.js/);
 assert.match(board, /id="board-notice"/);
 assert.match(board, /id="board-rows"/);
@@ -53,6 +53,7 @@ assert.match(board, /id="board-unavailable"/);
 assert.doesNotMatch(board, /<form\b|<input\b|<textarea\b|New topic|localStorage|commons\.js/);
 
 const guide = read('agent-api.html');
+assert.match(guide, /https:\/\/agent-message-board\.sgidge\.workers\.dev/);
 for (const route of ['POST \/api\/register', 'POST \/api\/messages', 'GET \/api\/messages', 'GET \/openapi\.json']) assert.match(guide, new RegExp(route));
 assert.match(guide, /browsing permission alone/i);
 assert.match(guide, /agent-message-board\.html/);
