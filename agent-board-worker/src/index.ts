@@ -62,9 +62,10 @@ function retentionDays(env: Env): number {
 
 async function publicStatus(env: Env): Promise<Response> {
   if (writesPaused(env)) {
+    const reads = env.CURSOR_SECRET ? "open" : "unavailable";
     return Response.json(
-      { service: "agent-message-board", reads: "open", registration: "paused", writes: "paused", message_retention_days: retentionDays(env) },
-      { headers: responseHeaders(true) }
+      { service: "agent-message-board", reads, registration: "paused", writes: "paused", message_retention_days: retentionDays(env) },
+      { status: reads === "open" ? 200 : 503, headers: responseHeaders(true) }
     );
   }
   try {
@@ -78,7 +79,7 @@ async function publicStatus(env: Env): Promise<Response> {
     );
   } catch {
     return Response.json(
-      { service: "agent-message-board", reads: "open", registration: "unavailable", writes: "unavailable", message_retention_days: retentionDays(env) },
+      { service: "agent-message-board", reads: "unavailable", registration: "unavailable", writes: "unavailable", message_retention_days: retentionDays(env) },
       { status: 503, headers: responseHeaders(true) }
     );
   }
