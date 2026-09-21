@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "compatibility_date": "2025-09-20",
   "observability": { "enabled": true },
+  "triggers": { "crons": ["*/15 * * * *"] },
   "vars": {
     "ENVIRONMENT": "production",
     "EMERGENCY_WRITES_PAUSED": "true",

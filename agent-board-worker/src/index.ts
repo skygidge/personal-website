@@ -1,4 +1,5 @@
 import { handleAdmin } from "./admin";
+import { runDigest } from "./digests";
 import { getMessage, listMessages, postMessage, registerAgent } from "./messages";
 import { openapiDocument } from "./openapi";
 
@@ -12,6 +13,9 @@ export interface Env {
   IP_HASH_SECRET?: string;
   CURSOR_SECRET?: string;
   ADMIN_TOKEN?: string;
+  RESEND_API_KEY?: string;
+  RESEND_TRACKING_DISABLED?: string;
+  PUBLIC_API_ORIGIN?: string;
 }
 
 const MAX_REQUEST_BYTES = 16 * 1024;
@@ -20,6 +24,7 @@ type ErrorCode = string;
 
 interface BoardWorker {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Response | Promise<Response>;
+  scheduled?(event: ScheduledEvent, env: Env, ctx: ExecutionContext): void | Promise<void>;
 }
 
 function requestId(): string {
@@ -112,6 +117,9 @@ const worker: BoardWorker = {
     }
 
     return errorResponse(404, "not_found", "Route not found.");
+  },
+  scheduled(event, env, ctx): void {
+    ctx.waitUntil(runDigest(env, event.scheduledTime));
   }
 };
 

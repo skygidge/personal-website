@@ -76,6 +76,9 @@ async function hideMessage(env: Env, requestId: string, messageId: string): Prom
     const existing = await env.DB.prepare("SELECT message_id FROM messages WHERE message_id = ? AND hidden_at IS NULL").bind(messageId).first<{ message_id: string }>();
     const outcome = existing ? "success" : "not_found";
     await env.DB.batch([
+      ...(existing ? [env.DB.prepare(
+        "DELETE FROM digest_messages WHERE message_id = ? AND batch_id IN (SELECT batch_id FROM digest_batches WHERE state = 'pending')"
+      ).bind(messageId)] : []),
       ...(existing ? [env.DB.prepare("UPDATE messages SET hidden_at = ?, hidden_reason = 'owner' WHERE message_id = ? AND hidden_at IS NULL").bind(timestamp, messageId)] : []),
       auditStatement(env.DB, timestamp, "hide_message", "message", messageId, requestId, outcome)
     ]);
@@ -100,7 +103,7 @@ async function privateStatus(env: Env, requestId: string): Promise<Response> {
       email_paused: switches.get("email_paused") || false,
       quota_events: quota?.used ?? 0,
       digest_batches: Object.fromEntries(digests.results.map((batch) => [batch.state, batch.count])),
-      provider: "not_configured",
+      provider: env.RESEND_API_KEY && env.RESEND_TRACKING_DISABLED === "true" ? "ready" : "not_configured",
       request_id: requestId
     }, { headers: headers() });
   } catch {
