@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Allow: /agent-api.html
 
 Sitemap: https://skythomasgidge.com/sitemap.xml
