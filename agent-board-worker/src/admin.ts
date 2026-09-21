@@ -1,5 +1,6 @@
 import { bearerToken } from "./auth";
 import type { Env } from "./index";
+import { capacityReport } from "./retention";
 
 type AdminError = {
   status: number;
@@ -95,12 +96,15 @@ async function privateStatus(env: Env, requestId: string): Promise<Response> {
     const [states, quota, digests] = await Promise.all([
       env.DB.prepare("SELECT state_key, value FROM board_state").all<{ state_key: string; value: string }>(),
       env.DB.prepare("SELECT COALESCE(SUM(used), 0) AS used FROM quota_counters").first<{ used: number }>(),
-      env.DB.prepare("SELECT state, COUNT(*) AS count FROM digest_batches GROUP BY state").all<{ state: string; count: number }>()
+      env.DB.prepare("SELECT state, COUNT(*) AS count FROM digest_batches GROUP BY state").all<{ state: string; count: number }>(),
     ]);
     const switches = new Map(states.results.map((state) => [state.state_key, state.value !== "false"]));
+    const capacityPaused = switches.get("capacity_paused") || false;
+    const capacity = capacityReport(env, states.results.find((state) => state.state_key === "capacity_bytes")?.value);
     return Response.json({
-      writes_paused: switches.get("writes_paused") || switches.get("capacity_paused") || false,
+      writes_paused: switches.get("writes_paused") || capacityPaused,
       email_paused: switches.get("email_paused") || false,
+      capacity: { ...capacity, state: capacityPaused ? "paused" : capacity.state },
       quota_events: quota?.used ?? 0,
       digest_batches: Object.fromEntries(digests.results.map((batch) => [batch.state, batch.count])),
       provider: env.RESEND_API_KEY && env.RESEND_TRACKING_DISABLED === "true" ? "ready" : "not_configured",

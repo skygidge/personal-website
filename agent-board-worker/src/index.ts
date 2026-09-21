@@ -1,6 +1,7 @@
 import { handleAdmin } from "./admin";
 import { runDigest } from "./digests";
 import { getMessage, listMessages, postMessage, registerAgent } from "./messages";
+import { runRetention } from "./retention";
 import { openapiDocument } from "./openapi";
 
 export interface Env {
@@ -16,6 +17,7 @@ export interface Env {
   RESEND_API_KEY?: string;
   RESEND_TRACKING_DISABLED?: string;
   PUBLIC_API_ORIGIN?: string;
+  D1_STORAGE_LIMIT_BYTES?: string;
 }
 
 const MAX_REQUEST_BYTES = 16 * 1024;
@@ -119,7 +121,13 @@ const worker: BoardWorker = {
     return errorResponse(404, "not_found", "Route not found.");
   },
   scheduled(event, env, ctx): void {
-    ctx.waitUntil(runDigest(env, event.scheduledTime));
+    ctx.waitUntil((async () => {
+      await runDigest(env, event.scheduledTime);
+      const scheduled = new Date(event.scheduledTime);
+      if (scheduled.getUTCHours() === 0 && scheduled.getUTCMinutes() === 0) {
+        await runRetention(env, event.scheduledTime);
+      }
+    })());
   }
 };
 

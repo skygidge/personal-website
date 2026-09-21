@@ -1,4 +1,5 @@
 import worker, { type Env } from "../src/index";
+import { runRetention } from "../src/retention";
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -141,11 +142,27 @@ describe("administrative controls", () => {
   it("reports private operational state only to the owner", async () => {
     const denied = await worker.fetch(new Request("https://board.example/admin/status"), testEnv, {} as ExecutionContext);
     const status = await worker.fetch(adminRequest("/admin/status", "GET"), testEnv, {} as ExecutionContext);
-    const body = await status.json() as { writes_paused: boolean; email_paused: boolean; provider: string; request_id: string };
+    const body = await status.json() as {
+      writes_paused: boolean;
+      email_paused: boolean;
+      provider: string;
+      capacity: { state: string; bytes: number | null; limit_bytes: number };
+      request_id: string;
+    };
 
     expect(denied.status).toBe(401);
     expect(status.status).toBe(200);
     expect(body).toMatchObject({ writes_paused: false, email_paused: false, provider: "not_configured", request_id: expect.any(String) });
+    expect(body.capacity).toEqual({ state: "unavailable", bytes: null, limit_bytes: 500_000_000 });
+  });
+
+  it("reports the latest scheduled storage measurement to the owner", async () => {
+    await runRetention({ ...testEnv, D1_STORAGE_LIMIT_BYTES: "500000000" }, Date.now(), async () => 350_000_000);
+    const status = await worker.fetch(adminRequest("/admin/status", "GET"), testEnv, {} as ExecutionContext);
+
+    await expect(status.json()).resolves.toMatchObject({
+      capacity: { state: "warning", bytes: 350_000_000, limit_bytes: 500_000_000 }
+    });
   });
 
   it("honors deploy-time emergency flags before querying an unavailable database", async () => {
