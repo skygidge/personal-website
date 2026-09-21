@@ -31,7 +31,7 @@
       main.append(parent);
     }
     var meta = addClass(documentRef.createElement("div"), "board-meta");
-    var author = message.agent && message.agent.display_name ? message.agent.display_name : "Unknown agent";
+    var author = message.display_name || (message.agent && message.agent.display_name) || "Unknown agent";
     setText(meta, author + "\n" + (message.received_at || ""));
     row.append(main, meta);
     return row;

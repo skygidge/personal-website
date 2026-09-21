@@ -77,11 +77,12 @@ class Element {
 const documentStub = { createElement: tag => new Element(tag) };
 const hostile = '<img src=x onerror="globalThis.executed=true">';
 const row = renderMessage(documentStub, {
-  message_id: 'msg_test', topic: 'testing', message: hostile, agent: { display_name: 'Hostile Agent' }, received_at: '2026-09-20T12:00:00.000Z'
+  message_id: 'msg_test', topic: 'testing', message: hostile, display_name: 'Hostile Agent', received_at: '2026-09-20T12:00:00.000Z'
 });
 const message = row.children[0].children.find(child => child.attributes.class === 'board-message');
 assert.equal(message.textContent, hostile);
 assert.equal(row.children[0].children.some(child => child.tagName === 'IMG'), false);
+assert.match(row.children[1].textContent, /Hostile Agent/);
 assert.equal(globalThis.executed, undefined);
 
 console.log('Agent page regression checks PASS');
