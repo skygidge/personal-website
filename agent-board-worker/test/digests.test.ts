@@ -348,6 +348,30 @@ describe("digest delivery", () => {
       .toEqual({ state: "pending", attempt_count: 0, payload_json: null });
   });
 
+  it("does not call the provider when email is paused after the batch lease", async () => {
+    await insertMessage();
+    let transactions = 0;
+    const db = new Proxy(env.DB, { get(target, property) {
+      if (property === "batch") return async (statements: D1PreparedStatement[]) => {
+        const result = await target.batch(statements);
+        if (++transactions === 2) {
+          await target.prepare("UPDATE board_state SET value = 'true' WHERE state_key = 'email_paused'").run();
+        }
+        return result;
+      };
+      const value = Reflect.get(target, property);
+      return typeof value === "function" ? value.bind(target) : value;
+    } });
+    const calls: Request[] = [];
+
+    await runDigest({ ...testEnv, DB: db }, scheduledAt, successfulDelivery(calls));
+
+    expect(transactions).toBeGreaterThanOrEqual(2);
+    expect(calls).toHaveLength(0);
+    expect(await env.DB.prepare("SELECT state, attempt_count FROM digest_batches").first())
+      .toEqual({ state: "leased", attempt_count: 1 });
+  });
+
   it.each([0, 89])("atomically reserves only one of two distinct batches with %i daily attempts used", async (used) => {
     for (const id of ["one", "two"]) {
       await insertMessage(`msg_${id}`);

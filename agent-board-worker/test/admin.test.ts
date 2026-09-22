@@ -202,6 +202,22 @@ describe("administrative controls", () => {
     expect(body.capacity).toEqual({ state: "unavailable", bytes: null, limit_bytes: 500_000_000 });
   });
 
+  it("reports emergency locks as effective after a database resume", async () => {
+    const emergencyEnv = {
+      ...testEnv,
+      ENVIRONMENT: "production",
+      EMERGENCY_WRITES_PAUSED: "true",
+      EMERGENCY_EMAIL_PAUSED: "true"
+    };
+    const writes = await worker.fetch(adminRequest("/admin/resume-writes"), emergencyEnv, {} as ExecutionContext);
+    const email = await worker.fetch(adminRequest("/admin/resume-email"), emergencyEnv, {} as ExecutionContext);
+    const status = await worker.fetch(adminRequest("/admin/status", "GET"), emergencyEnv, {} as ExecutionContext);
+
+    await expect(writes.json()).resolves.toMatchObject({ state: "writes_paused", value: "open", effective_value: "paused" });
+    await expect(email.json()).resolves.toMatchObject({ state: "email_paused", value: "open", effective_value: "paused" });
+    await expect(status.json()).resolves.toMatchObject({ writes_paused: true, email_paused: true });
+  });
+
   it("reports the latest scheduled storage measurement to the owner", async () => {
     await runRetention({ ...testEnv, D1_STORAGE_LIMIT_BYTES: "500000000" }, Date.now(), async () => 350_000_000);
     const status = await worker.fetch(adminRequest("/admin/status", "GET"), testEnv, {} as ExecutionContext);

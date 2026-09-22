@@ -232,6 +232,7 @@ export async function runDigest(env: Env, now: number, deliver: Deliver = fetch)
     if (!batch) return;
     const payloadJson = await leaseBatch(env.DB, batch, now, env.PUBLIC_API_ORIGIN);
     if (!payloadJson) return;
+    if (await emailPaused(env.DB)) return;
     const request = new Request("https://api.resend.com/emails", {
       method: "POST",
       headers: {

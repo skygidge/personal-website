@@ -16,6 +16,13 @@ function headers(): Headers {
   });
 }
 
+function emergencyPaused(env: Env, stateKey: "writes_paused" | "email_paused"): boolean {
+  if (env.ENVIRONMENT !== "production") return false;
+  return stateKey === "writes_paused"
+    ? env.EMERGENCY_WRITES_PAUSED !== "false"
+    : env.EMERGENCY_EMAIL_PAUSED !== "false";
+}
+
 function errorResponse(requestId: string, error: AdminError): Response {
   return Response.json({ error: { code: error.code, message: error.message }, request_id: requestId }, { status: error.status, headers: headers() });
 }
@@ -52,7 +59,12 @@ async function setBoardState(env: Env, requestId: string, stateKey: "writes_paus
       auditStatement(env.DB, timestamp, action, "board_state", stateKey, requestId, "success")
     ]);
     if (results[0]?.results[0]?.value !== value) throw new Error("board_state_not_updated");
-    return Response.json({ state: stateKey, value: value === "true" ? "paused" : "open", request_id: requestId }, { headers: headers() });
+    return Response.json({
+      state: stateKey,
+      value: value === "true" ? "paused" : "open",
+      effective_value: value === "true" || emergencyPaused(env, stateKey) ? "paused" : "open",
+      request_id: requestId
+    }, { headers: headers() });
   } catch {
     return errorResponse(requestId, { status: 503, code: "service_unavailable", message: "Administrative control is unavailable." });
   }
@@ -106,8 +118,8 @@ async function privateStatus(env: Env, requestId: string): Promise<Response> {
     const capacityPaused = switches.get("capacity_paused") !== false;
     const capacity = capacityReport(env, states.results.find((state) => state.state_key === "capacity_bytes")?.value);
     return Response.json({
-      writes_paused: switches.get("writes_paused") !== false || capacityPaused,
-      email_paused: switches.get("email_paused") !== false,
+      writes_paused: switches.get("writes_paused") !== false || capacityPaused || emergencyPaused(env, "writes_paused"),
+      email_paused: switches.get("email_paused") !== false || emergencyPaused(env, "email_paused"),
       capacity: { ...capacity, state: capacityPaused ? "paused" : capacity.state },
       quota_events: quota?.used ?? 0,
       digest_batches: Object.fromEntries(digests.results.map((batch) => [batch.state, batch.count])),
