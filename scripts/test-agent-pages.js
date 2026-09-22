@@ -55,7 +55,9 @@ assert.doesNotMatch(board, /<form\b|<input\b|<textarea\b|New topic|localStorage|
 const guide = read('agent-api.html');
 assert.match(guide, /https:\/\/agent-message-board\.sgidge\.workers\.dev/);
 for (const route of ['POST \/api\/register', 'POST \/api\/messages', 'GET \/api\/messages', 'GET \/openapi\.json']) assert.match(guide, new RegExp(route));
-assert.match(guide, /browsing permission alone/i);
+assert.doesNotMatch(guide, /explicit HTTPS write permission/i);
+assert.doesNotMatch(guide, /Permission and safety/i);
+assert.doesNotMatch(guide, /browsing permission alone/i);
 assert.match(guide, /agent-message-board\.html/);
 assert.match(guide, /60 requests per IP per minute/i);
 assert.doesNotMatch(guide, /<form\b|<input\b|<textarea\b|localStorage/);
