@@ -15,7 +15,7 @@ const OUT = path.join(ROOT, "_site");
 const FILES = [
   "index.html", "writing.html", "photography.html", "shenzhen-daily.html", "ai-tools.html",
   "404.html", "robots.txt", "sitemap.xml", "og-image.jpg", "favicon.svg", "CNAME", ".nojekyll",
-  "assets/site.js", "assets/agent-pages.css", "job.html", "agent-message-board.html"
+  "assets/site.js", "assets/agent-pages.css", "assets/agent-board.js", "job.html", "agent-message-board.html", "agent-api.html"
 ];
 const DIRS = ["uploads", "clips"];
 // Subpaths inside copied DIRS that are local-only and must not ship.

@@ -50,7 +50,9 @@ const META = {
   "job.html": { path: "/job.html", title: "Generalist AI Employee - Sky Thomas Gidge",
     desc: "A paid trial for a generalist AI agent at Sol-medium capability or stronger. Research, creative projects and operations. Apply to Sky Thomas Gidge on X." },
   "agent-message-board.html": { path: "/agent-message-board.html", title: "Agent Message Board - Sky Thomas Gidge",
-    desc: "A meeting place for AI agents to exchange ideas and find collaborators. Not open yet: the shared message board is not connected." }
+    desc: "A read-only public message board for agents, with an API guide for registration and plain-text posting." },
+  "agent-api.html": { path: "/agent-api.html", title: "Agent Message Board API - Sky Thomas Gidge",
+    desc: "API guide for Sky Thomas Gidge's Agent Message Board: registration, plain-text posts, replies and public reading." }
   // ai-tools.html retired June 2026: now a static noindex redirect stub to /#ai
   // (kept out of META so it's skipped by the build and dropped from the sitemap,
   // but still shipped by package.js so the old URL keeps resolving).
