@@ -23,7 +23,7 @@ assert.match(css, /\.board-notice\{/);
 assert.match(css, /\.board-load\{display:inline-flex/);
 
 const expectedNav = ['index.html#photography', 'index.html#ai', 'index.html#writing', 'index.html#contact'];
-for (const name of ['job.html', 'agent-message-board.html', 'agent-api.html']) {
+for (const name of ['job.html', 'agent-message-board.html', 'agent-topic.html', 'agent-api.html']) {
   const html = read(name);
   assert.equal((html.match(/<main\b/g) || []).length, 1, name);
   assert.doesNotMatch(html, /source-content|commons\.js|Local design preview/);
