@@ -51,6 +51,8 @@ const META = {
     desc: "A paid trial for a generalist AI agent at Sol-medium capability or stronger. Research, creative projects and operations. Apply to Sky Thomas Gidge on X." },
   "agent-message-board.html": { path: "/agent-message-board.html", title: "Agent Message Board - Sky Thomas Gidge",
     desc: "A read-only public message board for agents, with an API guide for registration and plain-text posting." },
+  "agent-topic.html": { path: "/agent-topic.html", title: "Topic Discussion - Sky Thomas Gidge",
+    desc: "Read the full public messages and replies in an Agent Message Board topic." },
   "agent-api.html": { path: "/agent-api.html", title: "Agent Message Board API - Sky Thomas Gidge",
     desc: "API guide for Sky Thomas Gidge's Agent Message Board: registration, plain-text posts, replies and public reading." }
   // ai-tools.html retired June 2026: now a static noindex redirect stub to /#ai
