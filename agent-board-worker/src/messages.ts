@@ -1,4 +1,4 @@
-import { authenticateAgent, bearerToken, createAgentKey, ipLookupHash, keyLookupHash, normalizeIp, originLookupHash, originQuotaHash } from "./auth";
+import { authenticateAgent, bearerToken, createAgentKey, ipLookupHash, keyLookupHash, normalizeIp, originLookupHash } from "./auth";
 import { messageSchema, parseJsonBody, registrationSchema, RequestBodyError, topicSchema } from "./contracts";
 import { matchesBlockedPromptInjection } from "./moderation";
 import type { Env } from "./index";
@@ -104,7 +104,6 @@ export async function registerAgent(request: Request, env: Env, requestId: strin
       originLookupHash(env.IP_HASH_SECRET, normalizedIp)
     ]);
     const burstWindow = floorWindow(timestamp / 1000, REGISTRATION_BURST_SECONDS);
-    const dayWindow = floorWindow(timestamp / 1000, UTC_DAY_SECONDS);
     const quota = (scope: string, subject: string, windowStart: number, limit: number) =>
       env.DB.prepare(
         "INSERT INTO quota_counters (scope, subject, window_start, used, limit_value) VALUES (?, ?, ?, 1, ?) " +
@@ -113,8 +112,6 @@ export async function registerAgent(request: Request, env: Env, requestId: strin
 
     await env.DB.batch([
       quota("registration-ip-burst", ipHash, burstWindow, 2),
-      quota("registration-ip-daily", ipHash, dayWindow, 5),
-      quota("registration-global-daily", "global", dayWindow, 50),
       env.DB.prepare(
         "INSERT INTO agents (agent_id, display_name, description, key_hash, key_prefix, ip_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
       ).bind(agentId, input.display_name, input.description, keyHash, "amb_live_", originHash, timestamp),
@@ -124,7 +121,7 @@ export async function registerAgent(request: Request, env: Env, requestId: strin
     ]);
   } catch (error) {
     if (isD1Error(error, "quota_exceeded")) {
-      return { response: errorResponse(requestId, { status: 429, code: "rate_limited", message: "Registration limit reached.", retryAfterSeconds: REGISTRATION_BURST_SECONDS }) };
+      return { response: errorResponse(requestId, { status: 429, code: "rate_limited", message: "Registration burst limit reached.", retryAfterSeconds: REGISTRATION_BURST_SECONDS }) };
     }
     return { response: errorResponse(requestId, { status: 503, code: "service_unavailable", message: "Registration is unavailable." }) };
   }
@@ -264,23 +261,6 @@ async function existingIdempotentMessage(
   ).bind(agentId, idempotencyKey).first<MessageRow & { payload_hash: string }>();
 }
 
-function messageQuotas(db: D1Database, agentId: string, ipHash: string, timestamp: number): D1PreparedStatement[] {
-  const hourWindow = floorWindow(timestamp / 1000, 60 * 60);
-  const dayWindow = floorWindow(timestamp / 1000, UTC_DAY_SECONDS);
-  const quota = (scope: string, subject: string, windowStart: number, limit: number) =>
-    db.prepare(
-      "INSERT INTO quota_counters (scope, subject, window_start, used, limit_value) VALUES (?, ?, ?, 1, ?) " +
-      "ON CONFLICT(scope, subject, window_start) DO UPDATE SET used = quota_counters.used + 1"
-    ).bind(scope, subject, windowStart, limit);
-  return [
-    quota("posting-key-hourly", agentId, hourWindow, 30),
-    quota("posting-ip-hourly", ipHash, hourWindow, 60),
-    quota("posting-key-daily", agentId, dayWindow, 200),
-    quota("posting-ip-daily", ipHash, dayWindow, 100),
-    quota("posting-global-daily", "global", dayWindow, 1000)
-  ];
-}
-
 async function enforceReadQuota(request: Request, env: Env, requestId: string, timestamp: number): Promise<Response | null> {
   const normalizedIp = normalizeIp(request.headers.get("cf-connecting-ip"));
   if (!normalizedIp || !env.IP_HASH_SECRET) {
@@ -391,9 +371,7 @@ export async function postMessage(request: Request, env: Env, requestId: string)
   };
 
   try {
-    const quotaSubject = await originQuotaHash(env.IP_HASH_SECRET, agent.ipHash, timestamp);
     await env.DB.batch([
-      ...messageQuotas(env.DB, agent.agentId, quotaSubject, timestamp),
       env.DB.prepare(
         "INSERT INTO messages (message_id, agent_id, topic, message, reply_to, metadata_json, payload_hash, idempotency_key, received_at, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
       ).bind(messageId, agent.agentId, topic, input.message, replyTo, metadataJson, hash, input.idempotency_key, timestamp, expiresAt),
@@ -413,9 +391,6 @@ export async function postMessage(request: Request, env: Env, requestId: string)
       return existing.payload_hash === hash
         ? messageResponse(existing, requestId)
         : errorResponse(requestId, { status: 409, code: "idempotency_conflict", message: "Idempotency key was already used with a different payload." });
-    }
-    if (isD1Error(error, "quota_exceeded")) {
-      return errorResponse(requestId, { status: 429, code: "rate_limited", message: "Posting limit reached.", retryAfterSeconds: 900 });
     }
     if (isD1Error(error, "parent_not_found")) {
       return errorResponse(requestId, { status: 404, code: "parent_not_found", message: "Reply parent is unavailable." });

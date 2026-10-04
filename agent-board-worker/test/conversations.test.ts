@@ -1,6 +1,6 @@
 import worker, { type Env } from "../src/index";
 import { env } from "cloudflare:workers";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 const testEnv: Env = {
   DB: env.DB,
@@ -66,39 +66,11 @@ async function publish(agent: { apiKey: string }, body: Record<string, unknown>)
 
 describe("agent conversations", () => {
   beforeEach(resetBoard);
-  afterEach(() => vi.restoreAllMocks());
 
-  it.each([
-    ["posting-ip-hourly", 60],
-    ["posting-ip-daily", 100]
-  ] as const)("aggregates %s across registration dates and rotates quota subjects", async (scope, limit) => {
-    const clock = vi.spyOn(Date, "now").mockReturnValue(Date.UTC(2026, 8, 18, 12));
-    const first = await createAgent();
-    clock.mockReturnValue(Date.UTC(2026, 8, 19, 12));
-    const second = await createAgent();
-    clock.mockReturnValue(Date.UTC(2026, 8, 20, 12));
-    await publish(first, { idempotency_key: "origin-first-message" });
-    const firstSubject = await env.DB.prepare("SELECT subject FROM quota_counters WHERE scope = ?").bind(scope).first<string>("subject");
-    await env.DB.prepare("UPDATE quota_counters SET used = ? WHERE scope = ?").bind(limit, scope).run();
-    const limited = await worker.fetch(messageRequest(second.apiKey, {
-      topic: "quota", message: "A second key from the same origin.", idempotency_key: "origin-second-message"
-    }), testEnv, {} as ExecutionContext);
-    expect(limited.status).toBe(429);
-    const origins = await env.DB.prepare("SELECT ip_hash FROM agents ORDER BY created_at").all<{ ip_hash: string }>();
-    expect(origins.results[0]?.ip_hash).toBe(origins.results[1]?.ip_hash);
-    expect(firstSubject).not.toBe(origins.results[0]?.ip_hash);
-    clock.mockReturnValue(Date.UTC(2026, 8, 21, 12));
-    await publish(second, { idempotency_key: "origin-next-day-message" });
-    const subjects = await env.DB.prepare("SELECT subject FROM quota_counters WHERE scope = ? ORDER BY window_start").bind(scope).all<{ subject: string }>();
-    expect(subjects.results).toHaveLength(2);
-    expect(subjects.results[1]?.subject).not.toBe(firstSubject);
-  });
-
-  it.each([false, true])("resolves committed idempotency before quota rejection (changed=%s)", async (changed) => {
+  it.each([false, true])("resolves committed idempotency after concurrent insertion (changed=%s)", async (changed) => {
     const agent = await createAgent();
-    await publish(agent, { idempotency_key: "quota-boundary-seed" });
-    await env.DB.prepare("UPDATE quota_counters SET used = 29 WHERE scope = 'posting-key-hourly'").run();
-    const payload = { topic: "retries", message: "Boundary request.", idempotency_key: "quota-boundary-race" };
+    await publish(agent, { idempotency_key: "concurrent-insert-seed" });
+    const payload = { topic: "retries", message: "Boundary request.", idempotency_key: "concurrent-insert-race" };
     let arrived = 0;
     let release!: () => void;
     const barrier = new Promise<void>((resolve) => { release = resolve; });
@@ -119,8 +91,8 @@ describe("agent conversations", () => {
     const bodies = await Promise.all(responses.map((response) => response.json() as Promise<{ message_id: string }>));
     if (!changed) expect(bodies[0]?.message_id).toBe(bodies[1]?.message_id);
     expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM messages").first("count")).toBe(2);
-    expect(await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'posting-key-hourly'").first("used")).toBe(30);
-    expect(await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'posting-global-daily'").first("used")).toBe(2);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM audit_events WHERE action = 'post'").first("count")).toBe(2);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM quota_counters WHERE scope LIKE 'posting-%'").first("count")).toBe(0);
   });
 
   it.each(["writes_paused", "capacity_paused"])("rejects posts when %s is missing", async (stateKey) => {
@@ -169,7 +141,7 @@ describe("agent conversations", () => {
     expect(response.status).toBe(404);
     await expect(response.json()).resolves.toMatchObject({ error: { code: "parent_not_found" } });
     expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM messages").first("count")).toBe(1);
-    expect(await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'posting-key-hourly'").first("used")).toBe(1);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM audit_events WHERE action = 'post'").first("count")).toBe(1);
   });
 
   it("cancels an oversized posting stream before consuming the rest", async () => {
@@ -477,31 +449,6 @@ describe("agent conversations", () => {
     expect(responses.every((response) => response.status === 201)).toBe(true);
     expect(new Set(bodies.map((body) => body.message_id)).size).toBe(1);
     expect(count?.count).toBe(1);
-  });
-
-  it("enforces the per-key hourly posting quota without overshooting", async () => {
-    const agent = await createAgent();
-    for (let index = 0; index < 30; index += 1) {
-      const response = await worker.fetch(messageRequest(agent.apiKey, {
-        topic: "quota",
-        message: `Post ${index}`,
-        metadata: {},
-        idempotency_key: `post-20260920-quota-${String(index).padStart(3, "0")}`
-      }), testEnv, {} as ExecutionContext);
-      expect(response.status).toBe(201);
-    }
-    const limited = await worker.fetch(messageRequest(agent.apiKey, {
-      topic: "quota",
-      message: "Over the limit.",
-      metadata: {},
-      idempotency_key: "post-20260920-quota-030"
-    }), testEnv, {} as ExecutionContext);
-    const counter = await env.DB.prepare(
-      "SELECT used FROM quota_counters WHERE scope = 'posting-key-hourly'"
-    ).first<{ used: number }>();
-
-    expect(limited.status).toBe(429);
-    expect(counter?.used).toBe(30);
   });
 
   it("rejects revoked keys and database-paused posts without creating messages", async () => {

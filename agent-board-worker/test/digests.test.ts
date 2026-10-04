@@ -80,6 +80,7 @@ describe("digest delivery", () => {
     expect(body.text).toContain("https://board.example/api/messages/msg_digest00000000000000000000000001");
     expect(batch).toMatchObject({ state: "sent", provider_message_id: "email_123", payload_hash: expect.any(String) });
     expect(membership.results).toEqual([{ message_id: "msg_digest00000000000000000000000001" }]);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM quota_counters WHERE scope = 'email-global-daily'").first("count")).toBe(0);
   });
 
   it("keeps a busy interval within the fixed digest text ceiling", async () => {
@@ -134,7 +135,7 @@ describe("digest delivery", () => {
     expect(batch?.state).toBe("needs_review");
   });
 
-  it("does not exceed the daily outbound-attempt cap", async () => {
+  it("sends a digest despite an exhausted legacy daily counter", async () => {
     await insertMessage();
     await env.DB.prepare(
       "INSERT INTO quota_counters (scope, subject, window_start, used, limit_value) VALUES ('email-global-daily', 'global', ?, 90, 90)"
@@ -143,8 +144,9 @@ describe("digest delivery", () => {
     await runDigest(testEnv, scheduledAt, successfulDelivery(calls));
     const batch = await env.DB.prepare("SELECT state, attempt_count FROM digest_batches").first<{ state: string; attempt_count: number }>();
 
-    expect(calls).toHaveLength(0);
-    expect(batch).toMatchObject({ state: "pending", attempt_count: 0 });
+    expect(calls).toHaveLength(1);
+    expect(batch).toMatchObject({ state: "sent", attempt_count: 1 });
+    expect(await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'email-global-daily'").first("used")).toBe(90);
   });
 
   it("sends only once when two scheduler runs overlap", async () => {
@@ -372,7 +374,7 @@ describe("digest delivery", () => {
       .toEqual({ state: "leased", attempt_count: 1 });
   });
 
-  it.each([0, 89])("atomically reserves only one of two distinct batches with %i daily attempts used", async (used) => {
+  it.each([0, 89, 90])("reserves one competing batch while ignoring a legacy daily counter of %i", async (used) => {
     for (const id of ["one", "two"]) {
       await insertMessage(`msg_${id}`);
       await env.DB.batch([
@@ -396,7 +398,7 @@ describe("digest delivery", () => {
     await Promise.all(["one", "two"].map((id) => runDigest({ ...testEnv, DB: forBatch(id) }, scheduledAt, successfulDelivery(calls))));
     expect(calls).toHaveLength(1);
     expect((await env.DB.prepare("SELECT SUM(attempt_count) AS count FROM digest_batches").first<{ count: number }>())?.count).toBe(1);
-    expect((await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'email-global-daily'").first<{ used: number }>())?.used).toBe(used + 1);
+    expect((await env.DB.prepare("SELECT used FROM quota_counters WHERE scope = 'email-global-daily'").first<{ used: number }>())?.used).toBe(used);
     expect((await env.DB.prepare("SELECT COUNT(*) AS count FROM audit_events WHERE action = 'digest_attempt'").first<{ count: number }>())?.count).toBe(1);
   });
 });

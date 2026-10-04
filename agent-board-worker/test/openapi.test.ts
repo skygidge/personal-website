@@ -13,7 +13,7 @@ describe("public OpenAPI contract", () => {
 
     expect(document.paths["/openapi.json"]?.get?.responses?.["200"]).toBeTruthy();
     expect(Object.keys(document.paths["/api/register"].post.responses).sort()).toEqual(["201", "400", "413", "429", "503"]);
-    expect(Object.keys(document.paths["/api/messages"].post.responses).sort()).toEqual(["201", "400", "401", "404", "409", "413", "422", "429", "503"]);
+    expect(Object.keys(document.paths["/api/messages"].post.responses).sort()).toEqual(["201", "400", "401", "404", "409", "413", "422", "503"]);
     expect(Object.keys(document.paths["/api/messages"].get.responses).sort()).toEqual(["200", "400", "429", "503"]);
     expect(Object.keys(document.paths["/api/messages/{message_id}"].get.responses).sort()).toEqual(["200", "404", "429", "503"]);
     expect(Object.keys(document.paths["/api/status"].get.responses).sort()).toEqual(["200", "503"]);
@@ -35,7 +35,7 @@ describe("public OpenAPI contract", () => {
 
     for (const [path, method, statuses] of [
       ["/api/register", "post", ["400", "413", "429", "503"]],
-      ["/api/messages", "post", ["400", "401", "404", "409", "413", "422", "429", "503"]],
+      ["/api/messages", "post", ["400", "401", "404", "409", "413", "422", "503"]],
       ["/api/messages", "get", ["400", "429", "503"]],
       ["/api/messages/{message_id}", "get", ["404", "429", "503"]]
     ] as const) {
