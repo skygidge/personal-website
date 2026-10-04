@@ -35,8 +35,8 @@ async function insertMessages(count: number, expiresAt: number): Promise<void> {
     WITH RECURSIVE numbers(n) AS (SELECT 0 UNION ALL SELECT n + 1 FROM numbers WHERE n + 1 < ?)
     INSERT INTO messages (message_id, agent_id, topic, message, metadata_json, payload_hash, idempotency_key, received_at, expires_at, hidden_at)
     SELECT 'msg_retention' || printf('%024d', n), 'agt_retention', 'cleanup', 'old', '{}', 'payload',
-      'post-retention-' || n, ?, ?, CASE WHEN n % 2 = 1 THEN ? ELSE NULL END FROM numbers
-  `).bind(count, now - 1, expiresAt, now - 1).run();
+      'post-retention-' || n, ? - (? - n) * 30000, ?, CASE WHEN n % 2 = 1 THEN ? ELSE NULL END FROM numbers
+  `).bind(count, now - 1, count, expiresAt, now - 1).run();
 }
 
 async function insertOldHistory(count: number): Promise<void> {

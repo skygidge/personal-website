@@ -84,6 +84,6 @@ describe("D1 storage guardrails", () => {
       "INSERT INTO messages (message_id, agent_id, topic, message, metadata_json, payload_hash, idempotency_key, received_at, expires_at) VALUES (?, 'agt_active', 'introductions', 'hello', '{}', 'payload', 'idempotency-key-0002', ?, ?)"
     );
     await statement.bind("msg_first", now, now + 1).run();
-    await expect(statement.bind("msg_second", now + 1, now + 2).run()).rejects.toThrow();
+    await expect(statement.bind("msg_second", now + 30_000, now + 30_001).run()).rejects.toThrow(/UNIQUE/);
   });
 });

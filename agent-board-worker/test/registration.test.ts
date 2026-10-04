@@ -1,8 +1,8 @@
 import worker, { type Env } from "../src/index";
-import { authenticateAgent } from "../src/auth";
+import { authenticateAgent, ipLookupHash } from "../src/auth";
 import { parseJsonBody } from "../src/contracts";
 import { env } from "cloudflare:workers";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const testEnv: Env = {
   DB: env.DB,
@@ -36,6 +36,7 @@ function registrationRequest(body: unknown, address = "203.0.113.8"): Request {
 
 describe("agent registration", () => {
   beforeEach(resetBoard);
+  afterEach(() => vi.restoreAllMocks());
 
   it.each(["writes_paused", "capacity_paused"])("fails closed when the %s control is missing", async (stateKey) => {
     await env.DB.prepare("DELETE FROM board_state WHERE state_key = ?").bind(stateKey).run();
@@ -211,8 +212,8 @@ describe("agent registration", () => {
     expect(counter?.used).toBe(2);
   });
 
-  it("enforces the global daily registration quota atomically", async () => {
-    for (let index = 0; index < 50; index += 1) {
+  it("allows more than 50 registrations per day from distinct IPs", async () => {
+    for (let index = 0; index < 51; index += 1) {
       const response = await worker.fetch(registrationRequest({
         display_name: `Agent ${index}`,
         description: ""
@@ -220,16 +221,40 @@ describe("agent registration", () => {
       expect(response.status).toBe(201);
     }
 
-    const limited = await worker.fetch(registrationRequest({
-      display_name: "Agent 50",
-      description: ""
-    }, "2001:db8::99"), testEnv, {} as ExecutionContext);
-    const global = await env.DB.prepare(
-      "SELECT used FROM quota_counters WHERE scope = 'registration-global-daily'"
-    ).first<{ used: number }>();
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM agents").first("count")).toBe(51);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM quota_counters WHERE scope LIKE 'registration-%-daily'").first("count")).toBe(0);
+  });
 
-    expect(limited.status).toBe(429);
-    expect(global?.used).toBe(50);
+  it("allows more than five registrations from one IP per day across burst windows", async () => {
+    const start = Date.UTC(2026, 9, 3, 12);
+    let now = start;
+    vi.spyOn(Date, "now").mockImplementation(() => now);
+    for (let index = 0; index < 6; index += 1) {
+      now = start + Math.floor(index / 2) * 600_000;
+      const response = await worker.fetch(registrationRequest({
+        display_name: `Repeat IP ${index}`, description: ""
+      }), testEnv, {} as ExecutionContext);
+      expect(response.status).toBe(201);
+    }
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM agents").first("count")).toBe(6);
+    expect(await env.DB.prepare("SELECT COUNT(*) AS count FROM quota_counters WHERE scope LIKE 'registration-%-daily'").first("count")).toBe(0);
+  });
+
+  it("ignores exhausted legacy daily registration counters without changing them", async () => {
+    const now = Date.UTC(2026, 9, 3, 12);
+    vi.spyOn(Date, "now").mockReturnValue(now);
+    const ipHash = await ipLookupHash(testEnv.IP_HASH_SECRET!, "203.0.113.8", now);
+    const day = Math.floor(now / 86_400_000) * 86_400;
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO quota_counters VALUES ('registration-ip-daily', ?, ?, 5, 5)").bind(ipHash, day),
+      env.DB.prepare("INSERT INTO quota_counters VALUES ('registration-global-daily', 'global', ?, 50, 50)").bind(day)
+    ]);
+    const response = await worker.fetch(registrationRequest({
+      display_name: "Legacy counters ignored", description: ""
+    }), testEnv, {} as ExecutionContext);
+    expect(response.status).toBe(201);
+    const counters = await env.DB.prepare("SELECT used FROM quota_counters WHERE scope LIKE 'registration-%-daily' ORDER BY used").all<{ used: number }>();
+    expect(counters.results.map((row) => row.used)).toEqual([5, 50]);
   });
 
   it("refuses registration when the database pause switch is on", async () => {

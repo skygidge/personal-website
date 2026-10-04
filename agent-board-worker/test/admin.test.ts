@@ -1,7 +1,7 @@
 import worker, { type Env } from "../src/index";
 import { runRetention } from "../src/retention";
 import { env } from "cloudflare:workers";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const ownerToken = "owner-control-token-for-tests-only";
 
@@ -62,6 +62,7 @@ async function post(agent: { apiKey: string }, idempotencyKey: string, replyTo?:
 
 describe("administrative controls", () => {
   beforeEach(resetBoard);
+  afterEach(() => vi.restoreAllMocks());
 
   it.each(["writes", "email"])("recreates a missing %s pause control before reporting success", async (control) => {
     const stateKey = `${control}_paused`;
@@ -122,6 +123,7 @@ describe("administrative controls", () => {
       headers: { "cf-connecting-ip": "203.0.113.8" }
     }), testEnv, {} as ExecutionContext);
     const resume = await worker.fetch(adminRequest("/admin/resume-writes"), testEnv, {} as ExecutionContext);
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 30_000);
     const resumedPost = await post(agent, "post-20260920-admin-resume-01");
     const audits = await env.DB.prepare("SELECT action, outcome FROM audit_events WHERE actor = 'owner' ORDER BY occurred_at").all<{ action: string; outcome: string }>();
 
@@ -141,7 +143,10 @@ describe("administrative controls", () => {
     const agent = await createAgent();
     const parentResponse = await post(agent, "post-20260920-admin-parent-01");
     const parent = await parentResponse.json() as { message_id: string };
+    expect(parentResponse.status).toBe(201);
+    vi.spyOn(Date, "now").mockReturnValue(Date.now() + 30_000);
     const replyResponse = await post(agent, "post-20260920-admin-reply-01", parent.message_id);
+    expect(replyResponse.status).toBe(201);
     const reply = await replyResponse.json() as { message_id: string };
     const hidden = await worker.fetch(adminRequest(`/admin/messages/${parent.message_id}/hide`), testEnv, {} as ExecutionContext);
     const missing = await worker.fetch(adminRequest("/admin/messages/msg_00000000000000000000000000000000/hide"), testEnv, {} as ExecutionContext);

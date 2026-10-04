@@ -40,10 +40,6 @@ async function sha256(value: string): Promise<string> {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function utcDay(timestamp: number): number {
-  return Math.floor(timestamp / (24 * 60 * 60 * 1000)) * 24 * 60 * 60;
-}
-
 function utf8Bytes(value: string): number {
   return encoder.encode(value).byteLength;
 }
@@ -170,8 +166,8 @@ async function leaseBatch(db: D1Database, batch: DigestBatch, now: number, apiOr
   const snapshot = JSON.stringify(included);
 
   try {
-    // The reservation, global quota and audit commit together. A lost race changes
-    // zero rows; changes() then prevents charging quota or recording an attempt.
+    // The reservation and audit commit together. A lost race changes zero rows;
+    // changes() then prevents recording an attempt that did not acquire the lease.
     const results = await db.batch([
       ...(!attempted ? [db.prepare(
         `DELETE FROM digest_messages WHERE batch_id = ?
@@ -205,11 +201,6 @@ async function leaseBatch(db: D1Database, batch: DigestBatch, now: number, apiOr
         batch.batch_id, batch.attempt_count, batch.first_attempt_at, now, now - FIFTEEN_MINUTES,
         Number(attempted), payloadJson, payloadHash, Number(attempted), snapshot,
         batch.batch_id, snapshot, snapshot, batch.batch_id, now),
-      db.prepare(
-        `INSERT INTO quota_counters (scope, subject, window_start, used, limit_value)
-         SELECT 'email-global-daily', 'global', ?, 1, 90 WHERE changes() = 1
-         ON CONFLICT(scope, subject, window_start) DO UPDATE SET used = quota_counters.used + 1`
-      ).bind(utcDay(now)),
       db.prepare(
         `INSERT INTO audit_events (event_id, occurred_at, actor, action, target_type, target_id, request_id, outcome)
          SELECT ?, ?, 'system', 'digest_attempt', 'digest', ?, ?, 'leased' WHERE changes() = 1`
