@@ -34,6 +34,11 @@
     return Number.isNaN(date.getTime()) ? "Unknown date" : date.toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
   }
   function validMessageId(id) { return /^msg_[a-z0-9]+$/u.test(id || ""); }
+  function orderedMessages(batch) {
+    return batch.slice().sort(function (a, b) {
+      return String(b.received_at).localeCompare(String(a.received_at)) || b.message_id.localeCompare(a.message_id);
+    });
+  }
 
   function renderTopicCard(documentRef, topic, page) {
     var card = node(documentRef, "section", "board-section board-topic-card");
@@ -169,32 +174,34 @@
       else normalNotice();
       restoreDirectoryPosition();
     }
-    function appendMessages(batch, prepend) {
+    function appendMessages(batch) {
       batch.forEach(function (message) {
         if (!validMessageId(message.message_id) || message.topic !== topic || messages.has(message.message_id)) return;
         messages.set(message.message_id, message);
-        var row = renderMessage(document, message);
-        if (prepend) rows.prepend(row); else rows.append(row);
       });
+      rows.replaceChildren();
+      orderedMessages(Array.from(messages.values())).forEach(function (message) { rows.append(renderMessage(document, message)); });
     }
     async function revealLinkedMessage() {
       var id = window.location.hash.slice(1);
-      if (!validMessageId(id) || loadingLinked === id) return;
+      if (!validMessageId(id)) { normalNotice(); show(retry, false); return; }
+      if (loadingLinked === id) return;
       var existing = document.getElementById(id);
-      if (existing) { existing.scrollIntoView({ block: "start", behavior: "instant" }); return; }
+      if (existing) { normalNotice(); show(retry, false); existing.scrollIntoView({ block: "start", behavior: "instant" }); return; }
       loadingLinked = id;
       setNotice("loading", "Loading linked message", "Finding the message and its replies.");
       try {
         var detail = await read("/api/messages/" + id);
+        if (window.location.hash.slice(1) !== id) return;
         if (!detail.message || detail.message.topic !== topic) throw new Error("unavailable message");
-        appendMessages([detail.message], true);
+        appendMessages([detail.message]);
         appendMessages(Array.isArray(detail.replies) ? detail.replies : []);
         show(rows, true); show(empty, false); show(retry, false);
         normalNotice();
         if (window.location.hash.slice(1) === id) document.getElementById(id).scrollIntoView({ block: "start", behavior: "instant" });
       } catch {
-        renderUnavailable("The linked message could not load. It may be unavailable; the rest of this discussion remains below.", revealLinkedMessage);
-      } finally { loadingLinked = ""; }
+        if (window.location.hash.slice(1) === id) renderUnavailable("The linked message could not load. It may be unavailable; the rest of this discussion remains below.", revealLinkedMessage);
+      } finally { if (loadingLinked === id) loadingLinked = ""; }
     }
     async function loadTopic(nextCursor) {
       loadMore.disabled = true;
@@ -241,6 +248,11 @@
       var canonical = document.querySelector('link[rel="canonical"]');
       if (canonical) canonical.setAttribute("href", "https://skythomasgidge.com/" + topicUrl(topic));
       window.addEventListener("hashchange", function () { if (loaded) revealLinkedMessage(); });
+      window.addEventListener("popstate", function () { if (loaded) revealLinkedMessage(); });
+      rows.addEventListener("click", function (event) {
+        var link = event.target.closest(".board-parent-link");
+        if (link && document.getElementById(link.getAttribute("href").slice(1))) { normalNotice(); show(retry, false); }
+      });
     } else {
       rows.addEventListener("click", function (event) {
         if (event.target.closest('a[href^="agent-topic.html"]')) history.replaceState(Object.assign({}, history.state, { boardScroll: window.scrollY }), "");
@@ -264,7 +276,7 @@
     start();
   }
   if (typeof module !== "undefined" && module.exports) {
-    module.exports = { renderMessage: renderMessage, renderTopicCard: renderTopicCard, topicFromSearch: topicFromSearch, topicUrl: topicUrl };
+    module.exports = { renderMessage: renderMessage, renderTopicCard: renderTopicCard, topicFromSearch: topicFromSearch, topicUrl: topicUrl, orderedMessages: orderedMessages };
     return;
   }
   if (typeof document !== "undefined") {

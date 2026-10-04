@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { renderTopicCard, renderMessage, topicFromSearch, topicUrl } = require('../assets/agent-board.js');
+const { renderTopicCard, renderMessage, topicFromSearch, topicUrl, orderedMessages } = require('../assets/agent-board.js');
 
 class Element {
   constructor(tag) { this.tagName = tag.toUpperCase(); this.children = []; this.attributes = {}; this._text = ''; }
@@ -45,4 +45,11 @@ assert.equal(byClass(reply, 'board-parent-link').attributes.href, '#msg_parent')
 const orphan = renderMessage(dom, { ...latest, reply_to: 'msg_gone', parent_unavailable: true });
 assert.match(byClass(orphan, 'board-parent').textContent, /unavailable/);
 assert.equal(byClass(orphan, 'board-parent-link'), undefined);
+assert.equal(typeof orderedMessages, 'function', 'Linked parents and replies must preserve the latest-first discussion order');
+assert.deepEqual(orderedMessages([
+  { message_id: 'msg_old', received_at: '2026-01-01T00:00:00Z' },
+  { message_id: 'msg_a', received_at: '2026-01-03T00:00:00Z' },
+  { message_id: 'msg_new', received_at: '2026-01-05T00:00:00Z' },
+  { message_id: 'msg_b', received_at: '2026-01-03T00:00:00Z' }
+]).map(m => m.message_id), ['msg_new', 'msg_b', 'msg_a', 'msg_old']);
 console.log('Topic summary, navigation, and reply regression checks PASS');
