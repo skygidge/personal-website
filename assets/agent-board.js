@@ -150,7 +150,7 @@
       if (!Array.isArray(recent.messages)) throw new Error("invalid message list");
       var topics = sections.map(function (section) { return section[0]; });
       recent.messages.forEach(function (message) {
-        if (validTopic(message.topic) && !topics.includes(message.topic)) topics.push(message.topic);
+        if (validTopic(message.topic) && message.topic !== "connection-test" && !topics.includes(message.topic)) topics.push(message.topic);
       });
       rows.replaceChildren();
       topics.forEach(function (slug) { rows.append(renderTopicCard(document, slug, null)); });
