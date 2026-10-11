@@ -73,12 +73,6 @@
   .hero .cap .lab{display:block;margin-bottom:14px}
   .hero .cap .about{font-family:var(--serif);font-weight:400;font-size:clamp(21px,3.1vw,38px);line-height:1.24;
     letter-spacing:-.01em;max-width:23ch;color:var(--ink);margin:0}
-  .hero .scroll{position:absolute;right:40px;bottom:56px;z-index:2;display:flex;align-items:center;gap:10px;
-    font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft)}
-  .hero .scroll .ln{width:30px;height:1px;background:var(--soft);position:relative;overflow:hidden}
-  .hero .scroll .ln::after{content:"";position:absolute;inset:0;background:var(--accent);
-    animation:slide 2s ease-in-out infinite}
-  @keyframes slide{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100%)}}
   .hero .photo-meta{position:absolute;left:40px;top:80px;z-index:2}
 
   /* section frame */
@@ -227,7 +221,6 @@
       border-bottom:1px solid var(--line-2);padding:6px 0}
     .top.navopen nav{display:flex}
     .top nav a{padding:14px 22px;font-size:13px}
-    .hero .scroll{display:none}
   }
 
   /* ==== EPUB FEATURE — scoped styles for the Shenzhen True-Crime EPUB card ==== */
@@ -240,6 +233,9 @@
     border:1px solid rgba(212,102,58,.35);
     padding:26px 24px;position:relative;
   }
+  .epub-feature.seen{transition:opacity .7s ease,transform .3s,border-color .3s}
+  .epub-feature.seen:hover{border-color:var(--line);transform:translateY(-3px)}
+  @media (prefers-reduced-motion:reduce){.epub-feature.seen:hover{transform:none}}
   .epub-feature .st{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
   .epub-feature .mt{font-family:var(--mono);font-size:13px;letter-spacing:.04em;color:var(--accent)}
   .epub-feature h3{font-family:var(--serif);font-size:22px;font-weight:400;letter-spacing:-.01em;line-height:1.1;margin-top:12px}
@@ -355,7 +351,6 @@
 I&#39;m a video editor and photographer. Sometimes a journalist. Lately, against my better judgement, a builder of AI tools and a newsletter about them.
 <!--/BUILD:introLine--></p>
     </div>
-    <div class="scroll"><span>Scroll</span><span class="ln"></span></div>
   </header>
 
   <a class="job-strip" href="job.html"><span class="wrap"><span>Job opportunity: Generalist AI Employee</span><span>View opening →</span></span></a>
@@ -363,11 +358,11 @@ I&#39;m a video editor and photographer. Sometimes a journalist. Lately, against
   <main>
     <section id="photography">
       <div class="wrap">
-        <div class="sh"><span class="idx">01</span><h2>Photography</h2><span class="ct lab" id="pgCount"><!--BUILD:pgCount-->
+        <div class="sh"><span class="idx">01</span><h2><a href="photography.html">Photography</a></h2><a class="ct lab" id="pgCount" href="photography.html"><!--BUILD:pgCount-->
 50 frames · night · Shenzhen / LA
-<!--/BUILD:pgCount--></span></div>
+<!--/BUILD:pgCount--></a></div>
         <div class="award photo-award" id="photoAward"><!--BUILD:photoAward-->
-<span class="dot"></span><div><div class="k">Finalist Award · EyeShenzhen.com</div><div class="t">This is Mine — selected for street photography</div></div>
+<span class="dot"></span><div><div class="k">Finalist Award · EyeShenzhen.com</div><div class="t">&#39;This is Mine&#39; — selected for street photography</div></div>
 <!--/BUILD:photoAward--></div>
         <div class="pg" id="pg"><!--BUILD:pg-->
 <div class="cell" data-lb="photos" data-full="uploads/this-is-mine-street-shop.jpg" data-cap="This is Mine" data-loc="Street shop"><img src="uploads/this-is-mine-street-shop.jpg" alt="This is Mine" loading="lazy"><div class="ov"></div><span class="n">01</span><span class="cp">This is Mine · Street shop</span></div>
@@ -413,7 +408,7 @@ See all 50
 <div class="aic live-card">
   <div class="aic-top"><span class="st">Live · Proof of concept</span><span class="mt">FASTER VETTING</span></div>
   <h3>Sky&#39;s Pre-Post</h3><p>Built for the team managing influencer partnerships: it reviews creator videos faster, checks they meet FTC disclosure rules when the creator is paid, confirms the brand logo appears, and measures the video&#39;s tone. A proof of concept — and it worked.</p>
-  <div class="shot"><video src="uploads/skys-prepost-hero.mp4" autoplay muted loop playsinline aria-label="Sky&#39;s Pre-Post"></video></div>
+  <div class="shot"><video src="uploads/skys-prepost-hero.mp4" poster="uploads/skys-prepost-poster.jpg" autoplay muted loop playsinline aria-label="Sky&#39;s Pre-Post"></video></div>
   <div class="tags"><span>Compliance check</span><span>Tone analysis</span></div>
   <a class="live" href="https://skysprepost.app" target="_blank" rel="noopener"><span class="dot"></span>It's live — have a look ↗</a></div>
 <div class="aic">
@@ -457,7 +452,7 @@ See all 50
 
     <section id="writing">
       <div class="wrap">
-        <div class="sh"><span class="idx">03</span><h2>Writing</h2><span class="ct lab">A selection — more in the archive</span></div>
+        <div class="sh"><span class="idx">03</span><h2><a href="writing.html">Writing</a></h2><a class="ct lab" href="writing.html">A selection — more in the archive</a></div>
         <div class="award" id="award"><!--BUILD:award-->
 <span class="dot"></span><div><div class="k">Award · Shenzhen Press Group · 深圳报业集团</div><div class="t">Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily</div></div>
 <!--/BUILD:award--></div>
@@ -504,7 +499,7 @@ See all 50
   <div class="wd">Romance on a budget in the world&#39;s hardware capital.</div><div class="wn">One of the most-read things I wrote. Also the most fun to write — the two are probably related.</div></div>
   <div class="wside"><div class="wp">That&#39;s Magazines</div><div class="wacts"><a href="https://www.thatsmags.com/china/post/14723/bang-for-your-buck-cheap-dates" target="_blank" rel="noopener">Read it <span class="ar">↗</span></a></div></div>
 </div>
-<div class="wlist-foot"><a class="more" href="writing.html"><span>See 50 more articles</span><span class="ar">→</span></a><span class="lab">a selection across 8 sections</span></div>
+<div class="wlist-foot"><a class="more" href="writing.html"><span>See 50 more articles</span><span class="ar">→</span></a><span class="lab">More of my published work</span></div>
 <!--/BUILD:wlist--></div>
       </div>
     </section>

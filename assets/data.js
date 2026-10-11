@@ -104,7 +104,7 @@ window.SKY = (function () {
       t: "White Collar Fighters Talk Trash, Sweat Profusely in Shenzhen", kicker: "Feature", pub: "That's Magazines",
       d: "Office workers throw punches at charity fight night — and take it way too seriously.",
       site: TM + "shenzhen/post/19335/white-collar-fighters-talk-trash-sweat-profusely-in-shenzhen",
-      pdf: P + "2017-06 p61 - White Collar Fighters Talk Trash, Sweat Profus.pdf" },
+      img: P + "thumbs/white-collar-fighters-article.jpg" },
     { group: "Features & investigations",
       t: "Where to Learn Public Speaking and Maybe Find Love", kicker: "City life", pub: "That's Magazines",
       d: "Toastmasters in Shenzhen — part self-improvement club, part unlikely dating scene.",
@@ -360,7 +360,7 @@ window.SKY = (function () {
   ];
 
   const award = { kicker: "Award", pub: "Shenzhen Press Group · 深圳报业集团", t: "Excellence in Journalism (优秀新闻奖) — for breaking coverage of a massive police raid, reporting for Shenzhen Daily" };
-  const photoAward = { kicker: "Finalist Award", pub: "EyeShenzhen.com", t: "This is Mine — selected for street photography" };
+  const photoAward = { kicker: "Finalist Award", pub: "EyeShenzhen.com", t: "'This is Mine' — selected for street photography" };
 
   const ai = [
     { t: "Video Selects: Claude in the Edit Bay", status: "Editing timesaver", link: "https://thepromptresponse.substack.com/p/no-6-june-4-2026", linkText: "Read the write-up ↗",
@@ -377,6 +377,7 @@ window.SKY = (function () {
       gallery: [U + "x4-air-all-sides.jpg", U + "insta360-ai-product-shot-01.jpg", U + "insta360-ai-product-shot-02.jpg", U + "insta360-ai-product-shot-03.jpg", U + "insta360-ai-product-shot-04.jpg", U + "insta360-ai-product-shot-05.jpg", U + "x4-air-fire-ice.jpg", U + "go-ultra-hands.jpg", U + "go-ultra-glow.jpg"] },
     { t: "Sky's Pre-Post", status: "Live · Proof of concept", live: "https://skysprepost.app",
       vid: U + "skys-prepost-hero.mp4",
+      poster: U + "skys-prepost-poster.jpg",
       d: "Built for the team managing influencer partnerships: it reviews creator videos faster, checks they meet FTC disclosure rules when the creator is paid, confirms the brand logo appears, and measures the video's tone. A proof of concept — and it worked.",
       tags: ["Compliance check", "Tone analysis"], metric: "FASTER VETTING" },
     { t: "Sales Analysis: David", status: "Case study",

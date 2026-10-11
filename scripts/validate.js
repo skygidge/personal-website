@@ -34,14 +34,14 @@ const dataRefs = new Set();
 const addRef = (p) => { if (p && /^uploads\//.test(p)) dataRefs.add(p); };
 S.photos.forEach((p) => addRef(p.src));
 S.writing.forEach((w) => { addRef(w.pdf); addRef(w.img); });
-S.ai.forEach((p) => { addRef(p.img); (p.gallery || []).forEach(addRef); });
+S.ai.forEach((p) => { addRef(p.img); addRef(p.vid); addRef(p.poster); (p.gallery || []).forEach(addRef); });
 
 // references inside the HTML (src/href/data-* to local paths), resolved repo-relative
 const htmlLocalRefs = new Map(); // resolved ref -> page
 for (const page of PAGES.concat(["404.html"], CLIPS)) {
   if (!exists(page)) continue;
   const html = read(page);
-  const m = html.match(/(?:src|href|data-full|data-pdf-thumb)="([^"]+)"/g) || [];
+  const m = html.match(/(?:src|href|poster|data-full|data-pdf-thumb)="([^"]+)"/g) || [];
   m.forEach((raw) => {
     const v = decode(raw.replace(/^[^"]+"/, "").replace(/"$/, ""));
     if (/^(https?:|mailto:|tel:|#|data:)/.test(v)) return;
