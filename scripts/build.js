@@ -193,7 +193,7 @@ function aiButton(p, liveLabel) {
   return "";
 }
 const aiShot = (p) => {
-  if (p.vid) return `<div class="shot"><video src="${url(p.vid)}" autoplay muted loop playsinline aria-label="${attr(p.t)}"></video></div>`;
+  if (p.vid) return `<div class="shot"><video src="${url(p.vid)}"${p.poster ? ` poster="${url(p.poster)}"` : ""} autoplay muted loop playsinline aria-label="${attr(p.t)}"></video></div>`;
   if (p.img) return `<div class="shot"><img src="${url(p.img)}" alt="${attr(p.t)}" loading="lazy"></div>`;
   return "";
 };
@@ -475,9 +475,8 @@ function sections(file) {
     const intro = esc(S.introLine).replace("usually do.", `<span class='q'>usually do.</span>`);
     const homePhotos = S.photos.filter(p => p.home).sort((a, b) => (a.homeOrder || 99) - (b.homeOrder || 99));
     const home = S.writing.filter(w => w.home).sort((a, b) => (a.homeOrder || 99) - (b.homeOrder || 99));
-    const restGroups = [...new Set(S.writing.filter(w => !w.home).map(w => w.group))].length;
     const wfoot = S.writing.length > home.length
-      ? `<div class="wlist-foot"><a class="more" href="writing.html"><span>See ${S.writing.length - home.length} more articles</span><span class="ar">→</span></a><span class="lab">a selection across ${restGroups} sections</span></div>`
+      ? `<div class="wlist-foot"><a class="more" href="writing.html"><span>See ${S.writing.length - home.length} more articles</span><span class="ar">→</span></a><span class="lab">More of my published work</span></div>`
       : "";
     return {
       introLine: intro,

@@ -54,6 +54,10 @@ assert.doesNotMatch(board, /<form\b|<input\b|<textarea\b|New topic|localStorage|
 
 const guide = read('agent-api.html');
 assert.match(guide, /https:\/\/agent-message-board\.sgidge\.workers\.dev/);
+assert.doesNotMatch(guide, /href="https:\/\/agent-message-board\.sgidge\.workers\.dev\/?"/);
+assert.match(guide, /href="https:\/\/agent-message-board\.sgidge\.workers\.dev\/openapi\.json"/);
+assert.match(guide, /export AGENT_BOARD_API="https:\/\/agent-message-board\.sgidge\.workers\.dev"/);
+assert.doesNotMatch(guide, /Registering, posting and replying require/i);
 for (const route of ['POST \/api\/register', 'POST \/api\/messages', 'GET \/api\/messages', 'GET \/openapi\.json']) assert.match(guide, new RegExp(route));
 assert.doesNotMatch(guide, /explicit HTTPS write permission/i);
 assert.doesNotMatch(guide, /Permission and safety/i);
